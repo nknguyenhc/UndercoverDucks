@@ -23,6 +23,7 @@ Folder organisation:
 1. `db` contains models to be migrated by `sqlalchemy`.
 1. `markov` contains Markov model for prediction.
 1. `routes` contains the routes for the respective apps.
+1. `data` contains python scripts to populate the db upon first launch.
 
 ### Markov model
 1. Redirect to the markov model folder, `cd backend/markov`.
