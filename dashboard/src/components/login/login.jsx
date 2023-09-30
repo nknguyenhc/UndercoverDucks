@@ -7,6 +7,7 @@ export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const [isAlert, setIsAlert] = useState(false);
 
     const handleLogin = useCallback(() => {
         fetch('/user/login', postContent({
@@ -19,10 +20,15 @@ export default function Login() {
                     return;
                 }
                 res.json().then(res => {
-                    if (queryValue('next')) {
-                        navigate(queryValue('next'));
+                    if (res.message === 'success') {
+                        if (queryValue('next')) {
+                            navigate(queryValue('next'));
+                        } else {
+                            navigate('/');
+                        }
                     } else {
-                        navigate('/');
+                        setIsAlert(true);
+                        setPassword('');
                     }
                 });
             })
@@ -50,25 +56,36 @@ export default function Login() {
     return <div className="login">
         <div className="login-frame">
             <div className="text-center fs-4 fw-semibold">Login</div>
-            <div className="login-username">
+            <div className="login-section">
                 <label htmlFor="username">Username</label>
                 <input 
                     type="text"
                     id="username"
                     className="form-control"
+                    value={username}
                     onChange={event => setUsername(event.target.value)}
                 />
             </div>
-            <div className="login-password">
+            <div className="login-section">
                 <label htmlFor="password">Password</label>
                 <input
                     type="password"
                     id="password"
                     className="form-control"
+                    value={password}
                     onChange={event => setPassword(event.target.value)}
                 />
             </div>
             <button className="btn btn-primary login-submit" onClick={handleLogin}>Login</button>
+        </div>
+        <div 
+            className="alert alert-danger" 
+            role="alert"
+            style={{
+                opacity: isAlert ? 1 : 0,
+            }}
+        >
+            Wrong username or password
         </div>
     </div>;
 }
