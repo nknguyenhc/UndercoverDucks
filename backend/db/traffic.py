@@ -71,3 +71,8 @@ class Similarity(Base):
         back_populates="port2_similarities",
         foreign_keys=[port2_id],
     )
+    value: Mapped[float]
+
+    def __repr__(self) -> str:
+        return f"Similarity(id={self.id!r}, port1={self.port_from.name}, port2={self.port_to.name}, value={self.proportion})"
+
