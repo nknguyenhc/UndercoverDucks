@@ -4,7 +4,7 @@ from flask_login import (
     logout_user,
     login_required,
 )
-from webargs import fields
+from webargs import fields, ValidationError
 from webargs.flaskparser import use_args
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -22,18 +22,21 @@ def index():
 
 @users_bp.route('/login', methods=["GET"])
 @use_args({
-    "username": fields.Str(required=True),
-    "password": fields.Str(required=True),
+    "username": fields.Str(),
+    "password": fields.Str(),
 }, location="query")
 def login(args):
-    username = args["username"]
-    password = args["password"]
-    if auth_user(username, password):
-        user = User(username)
-        login_user(user)
-        flash("Logged in successfully")
-        return "<h2>Welcome, {}!<h2>".format(username)
-    return "nope"
+    try:
+        username = args["username"]
+        password = args["password"]
+        if auth_user(username, password):
+            user = User(username)
+            login_user(user)
+            flash("Logged in successfully")
+            return "<h2>Welcome, {}!<h2>".format(username)
+        return "nope"
+    except KeyError:
+        return "invalid login credentials provided"
 
 @users_bp.route('/logout', methods=["GET"])
 @login_required
