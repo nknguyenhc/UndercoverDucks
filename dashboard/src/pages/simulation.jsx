@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PortList from "../components/port/portlist";
+import Pin from "../components/pin/pin";
+import ViewPort from "../components/viewPort/viewPort";
 
 
 export default function Simulate() {
@@ -59,5 +61,37 @@ export default function Simulate() {
         },
     ]
 
-    return <PortList portlist={portlist} caption="Singapore" sortMethods={sortMethods} />;
+    const data = [
+        {
+          name: '30 Sep',
+          ships: 4000,
+          amt: 2400,
+        },
+        {
+          name: '7 Oct',
+          ships: 3000,
+          amt: 2210,
+        },
+        {
+          name: '14 Oct',
+          ships: 2000,
+          amt: 2290,
+        },
+        {
+          name: '21 Oct',
+          ships: 2780,
+          amt: 2000,
+        },
+        {
+          name: '28 Oct',
+          ships: 1890,
+          amt: 2181,
+        },
+      ];
+    
+    //<PortList portlist={portlist} caption="Singapore" sortMethods={sortMethods} />
+    //<Pin port={portlist[0]}/>
+    return <div>
+        <ViewPort port={portlist[0]} data={data}/>
+    </div>;
 }
