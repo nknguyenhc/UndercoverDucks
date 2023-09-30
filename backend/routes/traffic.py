@@ -7,7 +7,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
 from db.traffic import Port, Traffic, Similarity
-#from markov.markov import get_ship_proportions_over_time, get_new_change
+from markov.markov import get_ship_proportions_over_time, get_new_change
 from migrations import engine
 
 
@@ -303,7 +303,7 @@ def get_similarity_matrix():
         for similarity in session.scalars(select(Similarity)):
             from_id = similarity.port_from_id
             to_id = similarity.port_to_id
-            similarity = similarity.similarity
+            similarity = similarity.value
             matrix[from_id - 1][to_id - 1] = similarity
     np_matrix = np.array(matrix)
     return np_matrix
@@ -311,17 +311,19 @@ def get_similarity_matrix():
 def get_delta_matrix(payload):
     with Session(engine) as session:
         size = session.query(Port).count()
-        matrix = [[None for i in range(size)] for j in range(size)]
+        matrix = [[0 for i in range(size)] for j in range(size)]
         for row_change in payload:
             port_from_id = row_change["port_from_id"]
             for port_to in row_change["port_to_list"]:
                 port_to_id = port_to["port_to_id"]
                 proportion = port_to["proportion"]
+                print(port_from_id)
+                print(port_to_id)
                 traffic = session.query(Traffic) \
-                                 .filter(port_from_id == port_from_id) \
-                                 .filter(port_to_id == port_to_id) \
+                                 .filter(Traffic.port_from_id == port_from_id) \
+                                 .filter(Traffic.port_to_id == port_to_id) \
                                  .one()
-                matrix[port_from_id][port_to_id] = proportion - traffic.proportion
+                matrix[port_from_id - 1][port_to_id - 1] = proportion - traffic.proportion
     np_matrix = np.array(matrix)
     return np_matrix
 
@@ -333,7 +335,7 @@ def set_proportion():
     try:
         for row_change in payload:
             row_change["port_from_id"] = int(row_change["port_from_id"])
-            port_to_list = row_change["to_list"]
+            port_to_list = row_change["port_to_list"]
             for port_to in port_to_list:
                 port_to["port_to_id"] = int(port_to["port_to_id"])
                 port_to["proportion"] = float(port_to["proportion"])
@@ -351,13 +353,17 @@ def set_proportion():
     similarity_matrix = get_similarity_matrix()
     delta_matrix = get_delta_matrix(payload)
 
+    # print(initial_matrix)
+    # print(similarity_matrix)
+    # print(delta_matrix)
     new_matrix = get_new_change(initial_matrix, delta_matrix, similarity_matrix)
+    # print(new_matrix)
     with Session(engine) as session:
         for from_id, row in enumerate(new_matrix):
-            for to_id, proportion in enumerate(new_matrix):
+            for to_id, proportion in enumerate(row):
                 session.query(Traffic) \
-                    .filter(Traffic.port_from_id == from_id) \
-                    .filter(Traffic.port_to_id == to_id) \
+                    .filter(Traffic.port_from_id == from_id + 1) \
+                    .filter(Traffic.port_to_id == to_id + 1) \
                     .update({
                         "proportion": proportion
                     })
@@ -430,12 +436,12 @@ def add_port():
                 similarity1 = Similarity(
                     port_from_id=new_port_id,
                     port_to_id=port.id,
-                    value=0
+                    value=1
                 )
                 similarity2 = Similarity(
                     port_from_id=port.id,
                     port_to_id=new_port_id,
-                    value=0
+                    value=1
                 )
                 session.add(traffic1)
                 session.add(traffic2)
