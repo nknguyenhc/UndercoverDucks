@@ -34,15 +34,12 @@
 
 .portlist {
     width: 31.67vw;
-    height: 51.11vw;
     display: flex;
     flex-direction: column;
     gap: 18px;
-    padding-left: 32px;
-    padding-right: 32px;
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding: 24px 32px;
     border-radius: 30px;
+    background-color: white;
 
     &-list {
         display: flex;
