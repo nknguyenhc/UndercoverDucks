@@ -148,6 +148,17 @@ def between():
 @login_required
 def predict():
     number_of_weeks = request.args["weeks"]
+    try:
+        number_of_weeks = int(number_of_weeks)
+    except (ValueError, TypeError):
+        return dumps({
+            "message": "Invalid number of weeks provided"
+        }), 400
+    if (number_of_weeks < 0):
+        return dumps({
+            "message": "Number of weeks not within valid range"
+        }), 400
+    
     with Session(engine) as session:
         ports = session.query(Port).all()
         initial_volumes = list(map(lambda port: port.volume, ports))
@@ -248,6 +259,45 @@ def set_country_code():
             "message": "success",
         })
 
+@traffic.route('/set-similarity', methods=['POST'])
+@login_required
+def set_similarity():
+    payload = request.json
+    try:
+        port_from_id = int(payload["port_from_id"])
+        port_to_id = int(payload["port_to_id"])
+        new_similarity = float(payload["similarity"])
+    except (ValueError, TypeError):
+        return dumps({
+            "message": "Invalid id or similarity value provided"
+        }), 400
+    
+    if new_similarity < 0:
+        return dumps({
+            "message": "Similarity value is not within valid range"
+        }), 400
+    
+    with Session(engine) as session:
+        stmt = select(Similarity).where(Similarity.port_from_id == port_from_id)
+        sum = 0
+        for similarity in session.scalars(stmt):
+            if similarity.port_to_id != port_to_id:
+                sum += similarity.value
+        if sum == 0:
+            return dumps({
+                "message": "At least one similarity value from this port should be positive"
+            }), 400
+        session.query(Similarity) \
+                .filter(Similarity.port_from_id == port_from_id) \
+                .filter(Similarity.port_to_id == port_to_id) \
+                .update({
+                    "value": new_similarity
+                })
+        session.commit()
+        return dumps({
+            "message": "success"
+        })
+        
 @traffic.route('/set-proportion-row', methods = ['POST'])
 @login_required
 def set_proportion_row():
