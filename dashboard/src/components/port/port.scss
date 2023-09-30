@@ -95,12 +95,14 @@
         &-sort {
             display: flex;
             flex-direction: row;
-            gap: 5px;
             align-items: center;
-            width: fit-content;
+            justify-content: space-between;
+            width: 100%;
 
             &-container {
                 width: fit-content;
+                user-select: none;
+                width: 160px;
             }
 
             &-list {

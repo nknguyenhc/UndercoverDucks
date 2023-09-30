@@ -33,5 +33,10 @@ $color-green: rgba(65, 236, 113, 0.50);
   }
 }
 
+.inverted {
+  transform-origin: 50% 50%;
+  transform: rotate(180deg);
+}
+
 @import './components/login/login.scss';
 @import './components/port/port.scss';
