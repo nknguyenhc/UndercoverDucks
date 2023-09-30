@@ -42,10 +42,6 @@ if __name__ == '__main__':
             port_to_id=tuaslink.id,
             proportion=0.7,
         )
-        tuaslink.traffics_from.append(tuaslink_pasirpanjang)
-        tuaslink.traffics_to.append(pasirpanjang_tuaslink)
-        pasirpanjang.traffics_from.append(pasirpanjang_tuaslink)
-        pasirpanjang.traffics_to.append(tuaslink_pasirpanjang)
         session.add_all([
             tuaslink, 
             pasirpanjang, 

@@ -17,7 +17,6 @@ def get_port(port_id):
             "id": port.id,
             "name": port.name,
             "volume": port.volume,
-            "is_open": port.is_open,
         }
 
 @traffic.route('/', methods=['GET'])
@@ -30,7 +29,6 @@ def get_all():
                 "id": port.id,
                 "name": port.name,
                 "volume": port.volume,
-                "is_open": port.is_open,
             },
             session.scalars(portStmt)
         ))

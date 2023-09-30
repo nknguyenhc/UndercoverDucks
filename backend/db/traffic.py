@@ -19,8 +19,17 @@ class Port(Base):
         cascade="all, delete-orphan",
         foreign_keys="Traffic.port_to_id",
     )
+    port1_similarities: Mapped[List["Similarity"]] = relationship(
+        back_populates="port1",
+        cascade="all, delete-orphan",
+        foreign_keys="Similarity.port1_id",
+    )
+    port2_similarities: Mapped[List["Similarity"]] = relationship(
+        back_populates="port2",
+        cascade="all, delete-orphan",
+        foreign_keys="Similarity.port2_id",
+    )
     volume: Mapped[int]
-    is_open: Mapped[bool] = mapped_column(default=True)
 
     def __repr__(self) -> str:
         return f"Port(id={self.id!r}, name={self.name!r}, volume={self.volume!r})"
@@ -45,3 +54,20 @@ class Traffic(Base):
 
     def __repr__(self) -> str:
         return f"Address(id={self.id!r}, port_from={self.port_from.name}, port_to={self.port_to.name}, proportion={self.proportion})"
+
+class Similarity(Base):
+    __tablename__ = "similarity"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    port1_id: Mapped[int] = mapped_column(ForeignKey("port.id"))
+    port1: Mapped["Port"] = relationship(
+        "Port",
+        back_populates="port1_similarities",
+        foreign_keys=[port1_id],
+    )
+    port2_id: Mapped[int] = mapped_column(ForeignKey("port.id"))
+    port2: Mapped["Port"] = relationship(
+        "Port",
+        back_populates="port2_similarities",
+        foreign_keys=[port2_id],
+    )
