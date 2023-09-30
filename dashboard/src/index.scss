@@ -12,4 +12,26 @@ code {
     monospace;
 }
 
+// colors
+$color-pink: rgba(255, 199, 199, 0.50);
+$color-lightgrey: #6C6C6C;
+$color-yellow: rgba(255, 236, 64, 0.50);
+$color-green: rgba(65, 236, 113, 0.50);
+
+.bg {
+  &-pink {
+    background-color: $color-pink;
+  }
+  &-lightgrey {
+    background-color: $color-lightgrey;
+  }
+  &-yellow {
+    background-color: $color-yellow;
+  }
+  &-green {
+    background-color: $color-green;
+  }
+}
+
 @import './components/login/login.scss';
+@import './components/port/port.scss';
