@@ -10,7 +10,6 @@ from routes.traffic import traffic
 
 
 dotenv_path = join(dirname(__file__), '.env')
-print(dotenv_path)
 load_dotenv(dotenv_path)
 
 app = Flask(__name__)

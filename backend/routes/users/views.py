@@ -68,7 +68,6 @@ def is_logged_in():
         info.update({
             "username": current_user.username,
         })
-    print(info)
     return dumps(info)
 
 def auth_user(username: str, password: str) -> bool:
