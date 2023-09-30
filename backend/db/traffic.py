@@ -1,6 +1,6 @@
 from typing import List
 from typing import Optional
-from sqlalchemy import ForeignKey, String, Column, Integer
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
@@ -20,6 +20,7 @@ class Port(Base):
         foreign_keys="Traffic.port_to_id",
     )
     volume: Mapped[int]
+    is_open: Mapped[bool] = mapped_column(default=True)
 
     def __repr__(self) -> str:
         return f"Port(id={self.id!r}, name={self.name!r}, volume={self.volume!r})"

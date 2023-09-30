@@ -34,16 +34,12 @@ if __name__ == '__main__':
         )
         tuaslink_pasirpanjang = Traffic(
             port_from_id=tuaslink.id,
-            port_from=tuaslink,
             port_to_id=pasirpanjang.id,
-            port_to=pasirpanjang,
             proportion=0.5,
         )
         pasirpanjang_tuaslink = Traffic(
             port_from_id=pasirpanjang.id,
-            port_from=pasirpanjang,
             port_to_id=tuaslink.id,
-            port_to=tuaslink,
             proportion=0.7,
         )
         tuaslink.traffics_from.append(tuaslink_pasirpanjang)
