@@ -1,12 +1,15 @@
 from flask import Blueprint, request
 from flask_login import login_required
 from json import dumps
+import numpy as np
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
+
 from db.traffic import Port, Traffic, Similarity
 #from markov.markov import get_ship_proportions_over_time, get_new_change
 from migrations import engine
+
 
 traffic = Blueprint('traffic', __name__)
 
@@ -57,6 +60,7 @@ def get_all():
                 "value": similarity.value
             }
             traffic.setdefault("similarity", similarity)
+        print(get_proportion_matrix())
         return dumps({
             "message": "success",
             "ports": ports,
@@ -236,16 +240,16 @@ def set_country_code():
 @login_required
 def set_proportion_row():
     payload = request.json
-    from_port_id = payload.get("from_port_id")
-    to_port_list = payload.get("to_port_list")
-    length = len(to_port_list)
+    port_from_id = payload.get("port_from_id")
+    port_to_list = payload.get("port_to_list")
+    length = len(port_to_list)
 
     try:
-        from_port_id = int(from_port_id)
+        port_from_id = int(port_from_id)
         to_list = []
         sum = 0
-        for port in to_port_list:
-            to_port_id = int(port["to_port_id"])
+        for port in port_to_list:
+            port_to_id = int(port["port_to_id"])
             proportion = float(port["proportion"])
             if proportion < 0 or proportion > 1:
                 return dumps({
@@ -253,7 +257,7 @@ def set_proportion_row():
                 }), 400
             sum += proportion
             to_list.append({
-                "to_port_id": to_port_id,
+                "port_to_id": port_to_id,
                 "proportion": proportion
             })
         if sum != 1:
@@ -263,12 +267,12 @@ def set_proportion_row():
         with Session(engine) as session:
             if length != session.query(Port).count():
                 return dumps({
-                    "message": "invalid length of to_port_list",
+                    "message": "invalid length of port_to_list",
                 }), 400
             for port in to_list:
-                to_port_id = int(port["to_port_id"])
+                port_to_id = int(port["port_to_id"])
                 session.query(Traffic) \
-                       .filter((Traffic.port_from_id == from_port_id) & (Traffic.port_to_id == to_port_id)) \
+                       .filter((Traffic.port_from_id == port_from_id) & (Traffic.port_to_id == port_to_id)) \
                        .update({"proportion": port["proportion"]})
             session.commit()
         return dumps({
@@ -280,46 +284,83 @@ def set_proportion_row():
             "message": "invalid port id or proportion provided"
         }), 400
 
+def get_proportion_matrix():
+    with Session(engine) as session:
+        size = session.query(Port).count()
+        matrix = [[None for i in range(size)] for j in range(size)]
+        for traffic in session.scalars(select(Traffic)):
+            from_id = traffic.port_from_id
+            to_id = traffic.port_to_id
+            proportion = traffic.proportion
+            matrix[from_id - 1][to_id - 1] = proportion
+    np_matrix = np.array(matrix)
+    return np_matrix
+
+def get_similarity_matrix():
+    with Session(engine) as session:
+        size = session.query(Port).count()
+        matrix = [[None for i in range(size)] for j in range(size)]
+        for similarity in session.scalars(select(Similarity)):
+            from_id = similarity.port_from_id
+            to_id = similarity.port_to_id
+            similarity = similarity.similarity
+            matrix[from_id - 1][to_id - 1] = similarity
+    np_matrix = np.array(matrix)
+    return np_matrix
+
+def get_delta_matrix(payload):
+    with Session(engine) as session:
+        size = session.query(Port).count()
+        matrix = [[None for i in range(size)] for j in range(size)]
+        for row_change in payload:
+            port_from_id = row_change["port_from_id"]
+            for port_to in row_change["port_to_list"]:
+                port_to_id = port_to["port_to_id"]
+                proportion = port_to["proportion"]
+                traffic = session.query(Traffic) \
+                                 .filter(port_from_id == port_from_id) \
+                                 .filter(port_to_id == port_to_id) \
+                                 .one()
+                matrix[port_from_id][port_to_id] = proportion - traffic.proportion
+    np_matrix = np.array(matrix)
+    return np_matrix
+
 
 @traffic.route('/set-proportion', methods=['POST'])
 @login_required
 def set_proportion():
     payload = request.json
-    port_from_id = payload.get("port_from_id")
-    port_to_id = payload.get("port_to_id")
-    new_proportion = payload.get("new_proportion")
+    try:
+        for row_change in payload:
+            row_change["port_from_id"] = int(row_change["port_from_id"])
+            port_to_list = row_change["to_list"]
+            for port_to in port_to_list:
+                port_to["port_to_id"] = int(port_to["port_to_id"])
+                port_to["proportion"] = float(port_to["proportion"])
+                if port_to["proportion"] < 0 or port_to["proportion"] > 1:
+                    return dumps({
+                        "message": "new_proportion not within range",
+                    }), 400
 
-    try:
-        port_from_id = int(port_from_id)
     except (ValueError, TypeError):
         return dumps({
-            "message": "invalid port_from_id provided",
+            "message": "invalid port id or proportion provided",
         }), 400
     
-    try:
-        port_to_id = int(port_to_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_to_id provided",
-        }), 400
-    
-    try:
-        new_proportion = float(new_proportion)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid new_proportion provided",
-        }), 400
-    if new_proportion < 0 or new_proportion > 1:
-        return dumps({
-            "message": "new_proportion not within range",
-        }), 400
-    
+    initial_matrix = get_proportion_matrix()
+    similarity_matrix = get_similarity_matrix()
+    delta_matrix = get_delta_matrix(payload)
+
+    new_matrix = get_new_change(initial_matrix, delta_matrix, similarity_matrix)
     with Session(engine) as session:
-        session.query(Traffic) \
-            .filter(Traffic.port_from_id == port_from_id, Traffic.port_to_id == port_to_id) \
-            .update({
-                "proportion": new_proportion,
-            })
+        for from_id, row in enumerate(new_matrix):
+            for to_id, proportion in enumerate(new_matrix):
+                session.query(Traffic) \
+                    .filter(Traffic.port_from_id == from_id) \
+                    .filter(Traffic.port_to_id == to_id) \
+                    .update({
+                        "proportion": proportion
+                    })
         session.commit()
         return dumps({
             "message": "success",

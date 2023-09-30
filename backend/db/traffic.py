@@ -2,6 +2,8 @@ from typing import List
 from typing import Optional
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+import numpy as np
+
 from .base import Base
 
 class Port(Base):
