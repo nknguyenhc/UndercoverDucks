@@ -1,0 +1,129 @@
+.port {
+    display: flex;
+    flex-direction: row;
+    gap: 9px;
+    align-items: center;
+
+    &-country {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        height: 81px;
+        width: 68px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    &-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &-name {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    &-volume {
+        font-size: 12px;
+        color: $color-lightgrey;
+    }
+}
+
+.portlist {
+    width: 31.67vw;
+    height: 51.11vw;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    border-radius: 30px;
+
+    &-list {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        flex-shrink: 1;
+        overflow: auto;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background: white;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background: #D9D9D9;
+            border-radius: 4px;
+        }
+        
+        &::-webkit-scrollbar-thumb:hover {
+            background: $color-lightgrey;
+        }
+    }
+
+    &-header {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        &-top {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        &-title {
+            font-size: 25px;
+            font-weight: 500;
+        }
+
+        &-caption, &-sort {
+            font-size: 15px;
+            font-weight: 500;
+            color: $color-lightgrey;
+        }
+
+        &-sort {
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            align-items: center;
+            width: fit-content;
+
+            &-container {
+                width: fit-content;
+            }
+
+            &-list {
+                position: absolute;
+                top: 0px;
+                right: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 8px;
+                border-radius: 5px;
+                border: 1px solid $color-lightgrey;
+                background-color: white;
+                
+                &-container {
+                    position: relative;
+                    width: 100%;
+                }
+            }
+
+            &-item {
+                font-size: 15px;
+            }
+        }
+    }
+}
