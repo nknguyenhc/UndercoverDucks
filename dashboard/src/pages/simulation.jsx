@@ -62,5 +62,16 @@ export default function Simulate() {
         },
     ]
 
-    return <DateDisplay />;
+    return <div className="simulation">
+        <NavBar />
+        <div className="simulation-page">
+            <Greet />
+            <div className="simulation-page-body">
+                <PortList portlist={portlist} caption="Singapore" sortMethods={sortMethods} />
+                <div className="simulation-page-highlight">
+                    <DateDisplay />
+                </div>
+            </div>
+        </div>
+    </div>;
 }

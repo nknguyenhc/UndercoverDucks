@@ -1,0 +1,26 @@
+.simulation {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+
+    &-page {
+        padding: 48px 40px 36px 40px;
+        height: 100vh;
+        background-color: #F0F0F0;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+
+        &-body {
+            display: flex;
+            flex-direction: row;
+            gap: 35px;
+            flex-grow: 1;
+        }
+
+        &-highlight {
+            flex-grow: 1;
+        }
+    }
+}
