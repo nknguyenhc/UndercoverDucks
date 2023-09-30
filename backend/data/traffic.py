@@ -23,6 +23,7 @@ if __name__ == '__main__':
         tuaslink = Port(
             id=1,
             name="Tuas Link",
+            country_code="SGP",
             traffics_from=[],
             traffics_to=[],
             volume=1000,
@@ -30,6 +31,7 @@ if __name__ == '__main__':
         pasirpanjang = Port(
             id=2,
             name="Pasir Panjang",
+            country_code="SGP",
             traffics_from=[],
             traffics_to=[],
             volume=2000,

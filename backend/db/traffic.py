@@ -9,6 +9,7 @@ class Port(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30))
+    country_code: Mapped[str] = mapped_column(String(3))
     traffics_from: Mapped[List["Traffic"]] = relationship(
         back_populates="port_from",
         cascade="all, delete-orphan",

@@ -17,6 +17,7 @@ def get_port(port_id):
         return {
             "id": port.id,
             "name": port.name,
+            "country_code": port.country_code,
             "volume": port.volume,
         }
 
@@ -29,6 +30,7 @@ def get_all():
             lambda port: {
                 "id": port.id,
                 "name": port.name,
+                "country_code": port.country_code,
                 "volume": port.volume,
             },
             session.scalars(portStmt)
@@ -201,6 +203,36 @@ def set_name():
         return dumps({
             "message": "success",
         })
+    
+@traffic.route('/set-country-code', methods=['POST'])
+@login_required
+def set_country_code():
+    payload = request.json
+    port_id = payload.get("port_id")
+    new_country_code = payload.get("new_country_code")
+
+    try:
+        port_id = int(port_id)
+    except (ValueError, TypeError):
+        return dumps({
+            "message": "invalid port_id provided",
+        }), 400
+    
+    if type(new_country_code) != str:
+        return dumps({
+            "message": "invalid new_country_code provided", 
+        }), 400
+    
+    with Session(engine) as session:
+        session.query(Port) \
+            .filter(Port.id == port_id) \
+            .update({
+                "country_code": new_country_code
+            })
+        session.commit()
+        return dumps({
+            "message": "success",
+        })
 
 @traffic.route('/set-proportion-row', methods = ['POST'])
 @login_required
@@ -296,11 +328,16 @@ def set_proportion():
 def add_port():
     payload = request.json
     name = payload.get("name")
+    country_code = payload.get("country_code")
     volume = payload.get("volume")
 
     if type(name) != str:
         return dumps({
             "message": "invalid name provided",
+        }), 400
+    if type(country_code) != str:
+        return dumps({
+            "message": "invalid country code provided",
         }), 400
     try:
         volume = int(volume)
@@ -312,6 +349,7 @@ def add_port():
     with Session(engine) as session:
         port = Port(
             name=name,
+            country_code = country_code,
             traffics_from=[],
             traffics_to=[],
             volume=volume,
