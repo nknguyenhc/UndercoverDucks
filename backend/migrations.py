@@ -12,7 +12,6 @@ load_dotenv(dotenv_path)
 engine = create_engine(os.environ.get("DATABASE_URL"), echo=os.environ.get("DEBUG") == "True")
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
     Port.metadata.create_all(engine)
     Traffic.metadata.create_all(engine)
     UserAuth.metadata.create_all(engine)
