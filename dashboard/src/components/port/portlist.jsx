@@ -14,6 +14,7 @@ export default function PortList({
     const handleClick = useCallback((newIndex) => {
         setSortMethodIndex(newIndex);
         sortMethods[newIndex].sort();
+        setShowSort(false);
     }, [sortMethods]);
 
     return <div className="portlist">
@@ -25,7 +26,7 @@ export default function PortList({
                 </div>}
             </div>
             {sortMethods && <div className="portlist-header-sort-container">
-                <div className="portlist-header-sort">
+                <div className="portlist-header-sort" onClick={() => setShowSort(showSort => !showSort)}>
                     <div>Sorted by: {sortMethods[sortMethodIndex].name}</div>
                     <img src={arrowDown} className={showSort ? "inverted" : ""} alt="" />
                 </div>
