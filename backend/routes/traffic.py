@@ -144,6 +144,18 @@ def between():
             },
         })
 
+@traffic.route('/predict', methods=['GET'])
+@login_required
+def predict():
+    number_of_weeks = request.args["weeks"]
+    with Session(engine) as session:
+        ports = session.query(Port).all()
+        initial_volumes = list(map(lambda port: port.volume, ports))
+    volumes = get_ship_proportions_over_time(initial_volumes, get_proportion_matrix(), number_of_weeks)
+    return dumps({
+        "volumes": volumes,
+    })
+
 @traffic.route('/set-volume', methods=['POST'])
 @login_required
 def set_volume():
@@ -326,7 +338,6 @@ def get_delta_matrix(payload):
                 matrix[port_from_id - 1][port_to_id - 1] = proportion - traffic.proportion
     np_matrix = np.array(matrix)
     return np_matrix
-
 
 def calculate_new_proportion_matrix_and_update_db(payload):
     # payload in in the form of
