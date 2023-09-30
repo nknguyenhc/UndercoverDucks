@@ -57,9 +57,24 @@ if __name__ == '__main__':
             proportion=0.3,
         )
         similarity_tuaslink_pasirpanjang = Similarity(
-            port1_id=1,
-            port2_id=2,
+            port_from_id=1,
+            port_to_id=2,
             value=0.5,
+        )
+        similarity_tuaslink_tuaslink = Similarity(
+            port_from_id=1,
+            port_to_id=1,
+            value=0.5,
+        )
+        similarity_pasirpanjang_tuaslink = Similarity(
+            port_from_id=2,
+            port_to_id=1,
+            value=0,
+        )
+        similarity_pasirpanjang_pasirpanjang = Similarity(
+            port_from_id=2,
+            port_to_id=2,
+            value=0,
         )
         session.add_all([
             tuaslink, 
@@ -69,5 +84,8 @@ if __name__ == '__main__':
             pasirpanjang_tuaslink,
             pasirpanjang_pasirpanjang,
             similarity_tuaslink_pasirpanjang,
+            similarity_tuaslink_tuaslink,
+            similarity_pasirpanjang_tuaslink,
+            similarity_pasirpanjang_pasirpanjang,
         ])
         session.commit()
