@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PortList from "../components/port/portlist";
 import NavBar from "../components/navbar/navbar";
+import Greet from "../components/greet/greet";
 
 
 export default function Simulate() {
@@ -60,5 +61,5 @@ export default function Simulate() {
         },
     ]
 
-    return <NavBar />;
+    return <Greet />;
 }

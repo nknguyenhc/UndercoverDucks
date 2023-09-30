@@ -1,0 +1,26 @@
+.greet {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+
+    &-icon {
+        height: 56px;
+        width: 56px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+            max-height: 100%;
+            max-width: 100%;
+        }
+    }
+
+    &-text {
+        font-size: 20px;
+        font-weight: 500;
+    }
+}
