@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, select
 from db.base import Base
-from db.traffic import Port, Traffic
+from db.traffic import Port, Traffic, Similarity
 from db.users import UserAuth
 from dotenv import load_dotenv
 import os
@@ -14,4 +14,5 @@ engine = create_engine(os.environ.get("DATABASE_URL"), echo=os.environ.get("DEBU
 if __name__ == '__main__':
     Port.metadata.create_all(engine)
     Traffic.metadata.create_all(engine)
+    Similarity.metadata.create_all(engine)
     UserAuth.metadata.create_all(engine)

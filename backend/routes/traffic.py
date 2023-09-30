@@ -4,7 +4,8 @@ from json import dumps
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
-from db.traffic import Port, Traffic
+from db.traffic import Port, Traffic, Similarity
+#from markov.markov import get_ship_proportions_over_time, get_new_change
 from migrations import engine
 
 traffic = Blueprint('traffic', __name__)
@@ -42,6 +43,20 @@ def get_all():
             },
             session.scalars(trafficStmt)
         ))
+        for traffic in traffics:
+            from_id = traffic["port_from_id"]
+            to_id = traffic["port_to_id"]
+            if from_id != to_id:
+                stmt = select(Similarity).where((Similarity.port1_id == from_id) & (Similarity.port2_id == to_id)
+                                                | (Similarity.port2_id == from_id) & (Similarity.port1_id == to_id))
+                similarity = session.scalars(stmt).one()
+                similarity = {
+                    "id": similarity.id,
+                    "port1_id": similarity.port1_id,
+                    "port2_id": similarity.port2_id,
+                    "value": similarity.value
+                }
+                traffic.setdefault("similarity", similarity)
         return dumps({
             "message": "success",
             "ports": ports,
@@ -187,6 +202,51 @@ def set_name():
             "message": "success",
         })
 
+@traffic.route('/set-proportion-row', methods = ['POST'])
+@login_required
+def set_proportion_row():
+    payload = request.json
+    from_port_id = payload.get("from_port_id")
+    to_port_list = payload.get("to_port_list")
+    length = len(to_port_list)
+
+    try:
+        from_port_id = int(from_port_id)
+        to_list = []
+        sum = 0
+        for port in to_port_list:
+            to_port_id = int(port["to_port_id"])
+            proportion = float(port["proportion"])
+            sum += proportion
+            to_list.append({
+                "to_port_id": to_port_id,
+                "proportion": proportion
+            })
+        if sum != 1:
+            return dumps({
+                "message": "proportions do not add up to 1"
+            }), 400
+        with Session(engine) as session:
+            if length != session.query(Port).count():
+                return dumps({
+                    "message": "invalid length of to_port_list",
+                }), 400
+            for port in to_list:
+                to_port_id = int(port["to_port_id"])
+                session.query(Traffic) \
+                       .filter((Traffic.port_from_id == from_port_id) & (Traffic.port_to_id == to_port_id)) \
+                       .update({"proportion": port["proportion"]})
+            session.commit()
+        return dumps({
+            "message": "success",
+        })
+    
+    except (ValueError, TypeError):
+        return dumps({
+            "message": "invalid port id or proportion provided"
+        }), 400
+
+
 @traffic.route('/set-proportion', methods=['POST'])
 @login_required
 def set_proportion():
@@ -257,47 +317,43 @@ def add_port():
             volume=volume,
         )
         session.add(port)
-        session.commit()
-        return dumps({
-            "message": "success",
-        })
-
-@traffic.route('/add-connection', methods=['POST'])
-@login_required
-def add_connection():
-    payload = request.json
-    port_from_id = payload.get("port_from_id")
-    port_to_id = payload.get("port_to_id")
-    proportion = payload.get("proportion")
-
-    try:
-        port_from_id = int(port_from_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_from_id provided",
-        }), 400
-    
-    try:
-        port_to_id = int(port_to_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_to_id provided",
-        }), 400
-    
-    try:
-        proportion = float(proportion)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid proportion provided",
-        }), 400
-    
-    with Session(engine) as session:
-        traffic = Traffic(
-            port_from_id=port_from_id,
-            port_to_id=port_to_id,
-            proportion=proportion,
-        )
-        session.add(traffic)
+        session.flush()
+        session.refresh(port)
+        new_port_id = port.id
+        portStmt = select(Port)
+        for port in session.scalars(portStmt):
+            if port.id == new_port_id:
+                traffic = Traffic(
+                    port_from_id=new_port_id,
+                    port_to_id=new_port_id,
+                    proportion=1,
+                )
+                similarity = Similarity(
+                    port1_id=new_port_id,
+                    port2_id=new_port_id,
+                    value=0
+                )
+                session.add(traffic)
+                session.add(similarity)
+            else:
+                traffic1 = Traffic(
+                    port_from_id=new_port_id,
+                    port_to_id=port.id,
+                    proportion=0,
+                )
+                traffic2 = Traffic(
+                    port_from_id=port.id,
+                    port_to_id=new_port_id,
+                    proportion=0,
+                )
+                similarity = Similarity(
+                    port1_id=new_port_id,
+                    port2_id=port.id,
+                    value=0
+                )
+                session.add(traffic1)
+                session.add(traffic2)
+                session.add(similarity)
         session.commit()
         return dumps({
             "message": "success",
