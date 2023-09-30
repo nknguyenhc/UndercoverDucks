@@ -14,7 +14,7 @@ print(dotenv_path)
 load_dotenv(dotenv_path)
 
 app = Flask(__name__)
-app.secret_key = b'6G"8#g4]d90/Ko9uJI#H4eDjo]'
+app.secret_key = os.environ.get("SECRET").encode()
 app.register_blueprint(users_bp, url_prefix = "/user")
 app.register_blueprint(traffic, url_prefix="/traffic")
 
