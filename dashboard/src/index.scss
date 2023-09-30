@@ -17,6 +17,7 @@ $color-pink: rgba(255, 199, 199, 0.50);
 $color-lightgrey: #6C6C6C;
 $color-yellow: rgba(255, 236, 64, 0.50);
 $color-green: rgba(65, 236, 113, 0.50);
+$color-blue: #37B3E2;
 
 .bg {
   &-pink {
@@ -31,6 +32,9 @@ $color-green: rgba(65, 236, 113, 0.50);
   &-green {
     background-color: $color-green;
   }
+  &-blue {
+    background-color: $color-blue;
+  }
 }
 
 .inverted {
@@ -40,3 +44,4 @@ $color-green: rgba(65, 236, 113, 0.50);
 
 @import './components/login/login.scss';
 @import './components/port/port.scss';
+@import './components/navbar/navbar.scss';
