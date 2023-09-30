@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from flask_login import login_required
 from json import dumps
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
@@ -20,6 +21,7 @@ def get_port(port_id):
         }
 
 @traffic.route('/', methods=['GET'])
+@login_required
 def get_all():
     with Session(engine) as session:
         portStmt = select(Port)
@@ -49,6 +51,7 @@ def get_all():
         })
 
 @traffic.route('/volume', methods=['GET'])
+@login_required
 def volume():
     port_id = request.args.get('port_id')
     
@@ -70,6 +73,7 @@ def volume():
         }), 400
 
 @traffic.route('/between', methods=['GET'])
+@login_required
 def between():
     port_from_id = request.args.get('port_from_id')
     port_to_id = request.args.get('port_to_id')
@@ -124,6 +128,7 @@ def between():
         })
 
 @traffic.route('/set-volume', methods=['POST'])
+@login_required
 def set_volume():
     payload = request.json
     port_id = payload.get("port_id")
@@ -155,6 +160,7 @@ def set_volume():
         })
 
 @traffic.route('/set-name', methods=['POST'])
+@login_required
 def set_name():
     payload = request.json
     port_id = payload.get("port_id")
@@ -184,6 +190,7 @@ def set_name():
         })
 
 @traffic.route('/set-proportion', methods=['POST'])
+@login_required
 def set_proportion():
     payload = request.json
     port_from_id = payload.get("port_from_id")
@@ -227,6 +234,7 @@ def set_proportion():
         })
 
 @traffic.route('/add-port', methods=['POST'])
+@login_required
 def add_port():
     payload = request.json
     name = payload.get("name")
@@ -257,6 +265,7 @@ def add_port():
         })
 
 @traffic.route('/add-connection', methods=['POST'])
+@login_required
 def add_connection():
     payload = request.json
     port_from_id = payload.get("port_from_id")
@@ -297,6 +306,7 @@ def add_connection():
         })
 
 @traffic.route('/close-port', methods=['POST'])
+@login_required
 def close_port():
     payload = request.json
     port_id = payload.get("port_id")
