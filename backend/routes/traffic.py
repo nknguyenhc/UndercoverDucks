@@ -48,17 +48,15 @@ def get_all():
         for traffic in traffics:
             from_id = traffic["port_from_id"]
             to_id = traffic["port_to_id"]
-            if from_id != to_id:
-                stmt = select(Similarity).where((Similarity.port1_id == from_id) & (Similarity.port2_id == to_id)
-                                                | (Similarity.port2_id == from_id) & (Similarity.port1_id == to_id))
-                similarity = session.scalars(stmt).one()
-                similarity = {
-                    "id": similarity.id,
-                    "port1_id": similarity.port1_id,
-                    "port2_id": similarity.port2_id,
-                    "value": similarity.value
-                }
-                traffic.setdefault("similarity", similarity)
+            stmt = select(Similarity).where((Similarity.port_from_id == from_id) & (Similarity.port_to_id == to_id))
+            similarity = session.scalars(stmt).one()
+            similarity = {
+                "id": similarity.id,
+                "port_from_id": similarity.port_from_id,
+                "port_to_id": similarity.port_to_id,
+                "value": similarity.value
+            }
+            traffic.setdefault("similarity", similarity)
         return dumps({
             "message": "success",
             "ports": ports,
@@ -249,6 +247,10 @@ def set_proportion_row():
         for port in to_port_list:
             to_port_id = int(port["to_port_id"])
             proportion = float(port["proportion"])
+            if proportion < 0 or proportion > 1:
+                return dumps({
+                    "message": "proportion not within valid range"
+                }), 400
             sum += proportion
             to_list.append({
                 "to_port_id": to_port_id,
@@ -367,8 +369,8 @@ def add_port():
                     proportion=1,
                 )
                 similarity = Similarity(
-                    port1_id=new_port_id,
-                    port2_id=new_port_id,
+                    port_from_id=new_port_id,
+                    port_to_id=new_port_id,
                     value=0
                 )
                 session.add(traffic)
@@ -384,14 +386,20 @@ def add_port():
                     port_to_id=new_port_id,
                     proportion=0,
                 )
-                similarity = Similarity(
-                    port1_id=new_port_id,
-                    port2_id=port.id,
+                similarity1 = Similarity(
+                    port_from_id=new_port_id,
+                    port_to_id=port.id,
+                    value=0
+                )
+                similarity2 = Similarity(
+                    port_from_id=port.id,
+                    port_to_id=new_port_id,
                     value=0
                 )
                 session.add(traffic1)
                 session.add(traffic2)
-                session.add(similarity)
+                session.add(similarity1)
+                session.add(similarity2)
         session.commit()
         return dumps({
             "message": "success",
