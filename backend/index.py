@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_login import LoginManager
 from dotenv import load_dotenv
 import os
@@ -25,6 +25,10 @@ login_manager.login_view = "users.index"
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == '__main__':
     app.run(host=os.environ.get("HOST"), port=os.environ.get("PORT"), debug=os.environ.get("DEBUG") == "True")
