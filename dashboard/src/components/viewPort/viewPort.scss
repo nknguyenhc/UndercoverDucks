@@ -1,0 +1,55 @@
+.pin {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    align-items: left;
+    padding-left: 30px;
+}
+
+.pinContainer {
+    display: flex;
+    flex: 1; 
+    flex-direction: row;
+    padding: 10px;
+    justify-content: space-between;
+}
+
+.pinDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pinName {
+    font-size: 30px;
+    font-weight: 500;
+}
+
+.pinCountry {
+    display: flex;
+    font-size: 20px;
+    font-weight: 500;
+    color: $color-lightgrey;
+}
+
+.pinVolume {
+    font-size: 25px;
+    color: $color-lightgrey;
+}
+
+.pinEdit {
+    padding-left: 20%;
+}
+
+.buttonContainer {
+    padding-top: 5px;
+    color: "#1E1E1E";
+    background-color: white;
+    border: 0px;
+    font-size: 20px;
+    text-decoration: underline;
+}
+
+.predictions {
+    font-size: 25; 
+}
