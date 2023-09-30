@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PortList from "../components/port/portlist";
 import NavBar from "../components/navbar/navbar";
 import Greet from "../components/greet/greet";
+import DateDisplay from "../components/greet/date";
 
 
 export default function Simulate() {
@@ -61,5 +62,5 @@ export default function Simulate() {
         },
     ]
 
-    return <Greet />;
+    return <DateDisplay />;
 }
