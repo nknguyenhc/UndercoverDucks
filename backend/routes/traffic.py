@@ -328,27 +328,9 @@ def get_delta_matrix(payload):
     return np_matrix
 
 
-@traffic.route('/set-proportion', methods=['POST'])
-@login_required
-def set_proportion():
-    payload = request.json
-    try:
-        for row_change in payload:
-            row_change["port_from_id"] = int(row_change["port_from_id"])
-            port_to_list = row_change["port_to_list"]
-            for port_to in port_to_list:
-                port_to["port_to_id"] = int(port_to["port_to_id"])
-                port_to["proportion"] = float(port_to["proportion"])
-                if port_to["proportion"] < 0 or port_to["proportion"] > 1:
-                    return dumps({
-                        "message": "new_proportion not within range",
-                    }), 400
-
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port id or proportion provided",
-        }), 400
-    
+def calculate_new_proportion_matrix_and_update_db(payload):
+    # payload in in the form of
+    # [{"port_from_id":<int>, "port_to_list":[{"port_to_id":<int>, "proportion"}]}]
     initial_matrix = get_proportion_matrix()
     similarity_matrix = get_similarity_matrix()
     delta_matrix = get_delta_matrix(payload)
@@ -371,6 +353,28 @@ def set_proportion():
         return dumps({
             "message": "success",
         })
+
+@traffic.route('/set-proportion', methods=['POST'])
+@login_required
+def set_proportion():
+    payload = request.json
+    try:
+        for row_change in payload:
+            row_change["port_from_id"] = int(row_change["port_from_id"])
+            port_to_list = row_change["port_to_list"]
+            for port_to in port_to_list:
+                port_to["port_to_id"] = int(port_to["port_to_id"])
+                port_to["proportion"] = float(port_to["proportion"])
+                if port_to["proportion"] < 0 or port_to["proportion"] > 1:
+                    return dumps({
+                        "message": "new_proportion not within range",
+                    }), 400
+
+    except (ValueError, TypeError):
+        return dumps({
+            "message": "invalid port id or proportion provided",
+        }), 400
+    return calculate_new_proportion_matrix_and_update_db(payload)
 
 @traffic.route('/add-port', methods=['POST'])
 @login_required
@@ -465,13 +469,26 @@ def close_port():
             "message": "invalid port_id provided",
         }), 400
     
+    # set the row to be 0 except for the port to itself which is 1
     with Session(engine) as session:
-        session.query(Port) \
-            .filter(Port.id == port_id) \
-            .update({
-                "is_open": False,
-            })
-        session.commit()
-        return dumps({
-            "message": "success"
-        })
+        size = session.query(Port).count()
+        session.query(Traffic) \
+                .filter(Traffic.port_from_id == port_id) \
+                .update({
+                    "proportion": 0 if Traffic.port_to_id == port_id else 1
+                })
+    
+    # set other entries in the column to be 0 and calculate new matrix
+    col = []
+    for i in range(size):
+        if i + 1 != port_id:
+            col.append(i + 1)
+    payload = list(map(lambda x : {
+        "port_from_id": x,
+        "port_to_list":[{
+            "port_to_id": port_id,
+            "proportion": 0
+        }
+        ]
+    }, col))
+    return calculate_new_proportion_matrix_and_update_db(payload)
