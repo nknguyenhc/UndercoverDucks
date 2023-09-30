@@ -8,11 +8,13 @@ Repository for PSA codesprint 2023 submission.
 1. Run `npm i` to install the necessary libraries. Libraries installed include:
   * `node-sass`
   * `react-router-dom`
+  * `bootstrap`
 1. Run `npm start` to start the React development server.
 
 Folder organisation:
 1. `router` contains the router and the children elements.
 1. `compoenents` contains reusable components.
+1. `page` contains the main simulation page.
 
 ### Backend
 1. In the terminal, redirect to the `backend` folder, `cd backend`.

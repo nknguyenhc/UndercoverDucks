@@ -3,10 +3,7 @@ from werkzeug.security import check_password_hash
 class User:
     def __init__(self, username: str):
         self.username = username
-    
-    @staticmethod
-    def is_authenticated():
-        return True
+        self.is_authenticated = True
 
     @staticmethod
     def is_active():

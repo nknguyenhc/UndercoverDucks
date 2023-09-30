@@ -1,5 +1,7 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "../App";
+import Login from "../components/login/login";
+import Simulate from "../pages/simulation";
 
 const router = createBrowserRouter([
   {
@@ -8,8 +10,12 @@ const router = createBrowserRouter([
     children: [
       {
         path: '',
-        element: <div>Children element</div>
-      }
+        element: <Simulate />
+      },
+      {
+        path: 'user/',
+        element: <Login />
+      },
     ]
   }
 ]);
