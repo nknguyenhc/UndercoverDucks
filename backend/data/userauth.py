@@ -13,7 +13,7 @@ from db.base import Base
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 
-dotenv_path = join(dirname(__file__), '.env')
+dotenv_path = join(dirname(__file__), '../.env')
 load_dotenv(dotenv_path)
 
 if __name__ == '__main__':
