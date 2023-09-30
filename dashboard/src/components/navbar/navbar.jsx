@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import dashboardIcon from './dashboard.png';
 import portIcon from './port.png';
 import trafficInfoIcon from './traffic-info.png';
-
+import logoutIcon from './logout.png';
 
 export default function NavBar() {
     const navbarTabs = useMemo(() => [
@@ -32,23 +32,42 @@ export default function NavBar() {
         0
     ), [navbarTabs, location]);
 
+    const handleLogout = useCallback(() => {
+        fetch('/user/logout')
+            .then(res => {
+                if (res.status !== 200) {
+                    alert("Something went wrong");
+                    return;
+                }
+                navigate('/user');
+            });
+    }, [navigate]);
+
     return <div className="navbar-container bg-blue">
-        <div className="navbar-top">Undercover Ducks</div>
-        <div className="navbar-body">
-            {navbarTabs.map((tab, tabIndex) => (
-                <div 
-                    className="navbar-tab" 
-                    onClick={() => navigate(tab.urlPrefix)}
-                    key={tabIndex}
-                >
-                    <div className="navbar-tab-icon">
-                        <img src={tab.img} alt="" />
+        <div className="navbar-main">
+            <div className="navbar-top">Undercover Ducks</div>
+            <div className="navbar-body">
+                {navbarTabs.map((tab, tabIndex) => (
+                    <div 
+                        className="navbar-tab" 
+                        onClick={() => navigate(tab.urlPrefix)}
+                        key={tabIndex}
+                    >
+                        <div className="navbar-tab-icon">
+                            <img src={tab.img} alt="" />
+                        </div>
+                        <div className={"navbar-tab-text" + (tabIndex === highlight ? " navbar-tab-highlight" : "")}>
+                            {tab.text}
+                        </div>
                     </div>
-                    <div className={"navbar-tab-text" + (tabIndex === highlight ? " navbar-tab-highlight" : "")}>
-                        {tab.text}
-                    </div>
-                </div>
-            ))}
+                ))}
+            </div>
+        </div>
+        <div className="navbar-tab navbar-logout" onClick={handleLogout}>
+            <div className="navbar-tab-icon">
+                <img src={logoutIcon} alt="" />
+            </div>
+            <div className="navbar-tab-text">Logout</div>
         </div>
     </div>;
 }

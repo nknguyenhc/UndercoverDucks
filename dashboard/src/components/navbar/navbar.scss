@@ -4,11 +4,17 @@
         padding-right: 36px;
         padding-top: 48px;
         padding-bottom: 48px;
+        width: fit-content;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    &-main {
         display: flex;
         flex-direction: column;
         gap: 70px;
-        width: fit-content;
-        height: 100vh;
     }
 
     &-top {
@@ -54,5 +60,9 @@
             color: black;
             font-weight: 700;
         }
+    }
+
+    &-logout {
+        padding-left: 28px;
     }
 }
