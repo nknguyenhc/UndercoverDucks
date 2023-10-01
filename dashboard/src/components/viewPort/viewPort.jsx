@@ -3,6 +3,7 @@ import Graph from "../pin/graph";
 import { PageContext } from "../../pages/simulation";
 import { useLocation } from "react-router-dom";
 import { postContent } from '../../utils/request';
+import DeletePort from './delete-port'; 
 
 export default function ViewPort() {
     const [showTextbox , setShowTextbox] = useState(false); 
@@ -124,7 +125,10 @@ export default function ViewPort() {
             </div>
             <div className="pinEdit">
                 {!showTextbox
-                    ? <button className='buttonContainer' onClick={handleEdit}>edit</button>
+                    ? <div className="viewport-editAndDeleteButtons">
+                        <button className='buttonContainer' onClick={handleEdit}>edit</button>
+                        <DeletePort/>
+                    </div>
                     : <div className="buttons">
                         <button className='buttonContainer' onClick={handleSave}>save</button>
                         <button className='buttonContainer' onClick={handleCancel}>cancel</button>
