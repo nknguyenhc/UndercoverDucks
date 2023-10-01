@@ -44,9 +44,11 @@ $color-blue: #37B3E2;
 
 @import './components/login/login.scss';
 @import './components/port/port.scss';
+@import './components/port/add-port.scss';
 @import './components/navbar/navbar.scss';
 @import './components/greet/greet.scss';
 @import './pages/simulation.scss';
 @import './components/viewPort/viewPort.scss';
+@import './components/viewPort/delete-port.scss';
 @import './components/traffic/traffic.scss';
 @import './components/traffic/traffic-edit-bulk.scss';
