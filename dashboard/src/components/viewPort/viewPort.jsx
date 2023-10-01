@@ -52,7 +52,7 @@ export default function ViewPort() {
 
     const refreshData = useCallback(() => {
         if (port) {
-            fetch(`/traffic/predict?port_id=${port.id}&weeks=5`)
+            fetch(`/traffic/predict?port_id=${port.id}&weeks=10`)
                 .then(res => {
                     if (res.status !== 200) {
                         alert("Something went wrong");

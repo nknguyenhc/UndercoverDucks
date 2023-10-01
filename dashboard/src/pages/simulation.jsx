@@ -159,6 +159,7 @@ export default function Simulate() {
 
     const handleResetData = useCallback(() => {
         refreshPorts();
+        setHighlightingPort(undefined);
         navigate('/dashboard');
     }, [refreshPorts, navigate])
 
