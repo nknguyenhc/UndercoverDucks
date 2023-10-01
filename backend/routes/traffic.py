@@ -60,7 +60,6 @@ def get_all():
                 "value": similarity.value
             }
             traffic.setdefault("similarity", similarity)
-        print(get_proportion_matrix())
         return dumps({
             "message": "success",
             "ports": ports,
@@ -147,47 +146,35 @@ def between():
 @traffic.route('/predict', methods=['GET'])
 @login_required
 def predict():
+    port_id = request.args["port_id"]
     number_of_weeks = request.args["weeks"]
     try:
+        port_id = int(port_id)
         number_of_weeks = int(number_of_weeks)
     except (ValueError, TypeError):
         return dumps({
-            "message": "Invalid number of weeks provided"
+            "message": "invalid port id or number of weeks provided"
         }), 400
-    if (number_of_weeks < 0):
+    if number_of_weeks < 0 or number_of_weeks > 20:
         return dumps({
-            "message": "Number of weeks not within valid range"
+            "message": "number of weeks not within valid range (0-20)"
         }), 400
     
     with Session(engine) as session:
+        size = session.query(Port).count()
+        if port_id <= 0 or port_id > size:
+            return dumps({
+                "message": "port id not within valid range (1-total_size)"
+            }), 400
         ports = session.query(Port).all()
         initial_volumes = list(map(lambda port: port.volume, ports))
     volumes = get_ship_proportions_over_time(initial_volumes, get_proportion_matrix(), number_of_weeks)
+    port_volumes = list(map(lambda vols: vols[port_id - 1], volumes))
     return dumps({
-        "volumes": volumes,
+        "volumes": port_volumes,
     })
 
-@traffic.route('/set-volume', methods=['POST'])
-@login_required
-def set_volume():
-    payload = request.json
-    port_id = payload.get("port_id")
-    new_volume = payload.get("new_volume")
-    
-    try:
-        port_id = int(port_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_id provided",
-        }), 400
-    
-    try:
-        new_volume = int(new_volume)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid new_volume provided",
-        }), 400
-    
+def set_volume(port_id, new_volume):
     with Session(engine) as session:
         session.query(Port) \
             .filter(Port.id == port_id) \
@@ -195,29 +182,8 @@ def set_volume():
                 "volume": new_volume
             })
         session.commit()
-        return dumps({
-            "message": "success",
-        })
 
-@traffic.route('/set-name', methods=['POST'])
-@login_required
-def set_name():
-    payload = request.json
-    port_id = payload.get("port_id")
-    new_name = payload.get("new_name")
-
-    try:
-        port_id = int(port_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_id provided",
-        }), 400
-    
-    if type(new_name) != str:
-        return dumps({
-            "message": "invalid new_name provided", 
-        }), 400
-    
+def set_name(port_id, new_name):
     with Session(engine) as session:
         session.query(Port) \
             .filter(Port.id == port_id) \
@@ -225,29 +191,8 @@ def set_name():
                 "name": new_name
             })
         session.commit()
-        return dumps({
-            "message": "success",
-        })
     
-@traffic.route('/set-country-code', methods=['POST'])
-@login_required
-def set_country_code():
-    payload = request.json
-    port_id = payload.get("port_id")
-    new_country_code = payload.get("new_country_code")
-
-    try:
-        port_id = int(port_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_id provided",
-        }), 400
-    
-    if type(new_country_code) != str:
-        return dumps({
-            "message": "invalid new_country_code provided", 
-        }), 400
-    
+def set_country_code(port_id, new_country_code):
     with Session(engine) as session:
         session.query(Port) \
             .filter(Port.id == port_id) \
@@ -255,9 +200,65 @@ def set_country_code():
                 "country_code": new_country_code
             })
         session.commit()
+
+@traffic.route('/set-port-info', methods=['POST'])
+@login_required
+def set_port_info():
+    payload = request.json
+    try:
+        port_id = int(payload.get("port_id"))
+    except (ValueError, TypeError):
         return dumps({
-            "message": "success",
-        })
+            "message": "invalid port id provided"
+        }), 400
+    
+    update_dict = payload.get("update_dict")
+
+    with Session(engine) as session:
+        size = session.query(Port).count()
+        if port_id < 1 or port_id > size:
+            return dumps({
+                "message": "port_id not within valid range (1-total_size)"
+            }), 400
+
+    converted_dict = {set_volume: None, set_name: None, set_country_code: None}
+    if "volume" in update_dict:
+        new_volume = update_dict["volume"]
+        try:
+            new_volume = int(new_volume)
+        except (ValueError, TypeError):
+            return dumps({
+                "message": "invalid volume provided"
+            }), 400      
+        if new_volume < 0:
+            return dumps({
+                "message": "new volume not within valid range (>=0)"
+            }), 400
+        converted_dict[set_volume] = new_volume
+
+    if "name" in update_dict:
+        new_name = update_dict["name"]  
+        if type(new_name) != str or len(new_name) <= 0:
+            return dumps({
+                "message": "invalid new name provided"
+            }), 400
+        converted_dict[set_name] = new_name
+
+    if "country" in update_dict:
+        new_country = update_dict["country"]  
+        if type(new_country) != str or len(new_country) <= 0:
+            return dumps({
+                "message": "invalid new country provided"
+            }), 400
+        converted_dict[set_country_code] = new_country
+
+    for entry in converted_dict.items():
+        if entry[1] is not None:
+            entry[0](port_id, entry[1])
+    
+    return dumps({
+        "message": "success"
+    })
 
 @traffic.route('/set-similarity', methods=['POST'])
 @login_required
@@ -269,12 +270,12 @@ def set_similarity():
         new_similarity = float(payload["similarity"])
     except (ValueError, TypeError):
         return dumps({
-            "message": "Invalid id or similarity value provided"
+            "message": "invalid id or similarity value provided"
         }), 400
     
     if new_similarity < 0:
         return dumps({
-            "message": "Similarity value is not within valid range"
+            "message": "similarity value is not within valid range (>=0)"
         }), 400
     
     with Session(engine) as session:
@@ -285,7 +286,7 @@ def set_similarity():
                 sum += similarity.value
         if sum == 0:
             return dumps({
-                "message": "At least one similarity value from this port should be positive"
+                "message": "at least one similarity value from this port should be positive"
             }), 400
         session.query(Similarity) \
                 .filter(Similarity.port_from_id == port_from_id) \
@@ -315,7 +316,7 @@ def set_proportion_row():
             proportion = float(port["proportion"])
             if proportion < 0 or proportion > 1:
                 return dumps({
-                    "message": "proportion not within valid range"
+                    "message": "proportion not within valid range (0-1)"
                 }), 400
             sum += proportion
             to_list.append({
@@ -379,8 +380,6 @@ def get_delta_matrix(payload):
             for port_to in row_change["port_to_list"]:
                 port_to_id = port_to["port_to_id"]
                 proportion = port_to["proportion"]
-                print(port_from_id)
-                print(port_to_id)
                 traffic = session.query(Traffic) \
                                  .filter(Traffic.port_from_id == port_from_id) \
                                  .filter(Traffic.port_to_id == port_to_id) \
@@ -394,7 +393,12 @@ def calculate_new_proportion_matrix_and_update_db(payload):
     # [{"port_from_id":<int>, "port_to_list":[{"port_to_id":<int>, "proportion"}]}]
     initial_matrix = get_proportion_matrix()
     similarity_matrix = get_similarity_matrix()
-    delta_matrix = get_delta_matrix(payload)
+    try:
+        delta_matrix = get_delta_matrix(payload)
+    except NoResultFound:
+        return dumps({
+            "message": "port id provided not within valid range (1-total_size)"
+        })
 
     # print(initial_matrix)
     # print(similarity_matrix)
@@ -428,13 +432,13 @@ def set_proportion():
                 port_to["proportion"] = float(port_to["proportion"])
                 if port_to["proportion"] < 0 or port_to["proportion"] > 1:
                     return dumps({
-                        "message": "new_proportion not within range",
+                        "message": "new_proportion not within valid range (0-1)",
                     }), 400
-
     except (ValueError, TypeError):
         return dumps({
             "message": "invalid port id or proportion provided",
         }), 400
+    
     return calculate_new_proportion_matrix_and_update_db(payload)
 
 @traffic.route('/add-port', methods=['POST'])
@@ -445,11 +449,11 @@ def add_port():
     country_code = payload.get("country_code")
     volume = payload.get("volume")
 
-    if type(name) != str:
+    if type(name) != str or len(name) <= 0:
         return dumps({
             "message": "invalid name provided",
         }), 400
-    if type(country_code) != str:
+    if type(country_code) != str or len(country_code) <= 0:
         return dumps({
             "message": "invalid country code provided",
         }), 400
@@ -460,6 +464,11 @@ def add_port():
             "message": "invalid volume provided",
         }), 400
     
+    if volume < 0:
+        return dumps({
+            "message": "volume not within valid range (>=0)"
+        })
+
     with Session(engine) as session:
         port = Port(
             name=name,
@@ -535,9 +544,17 @@ def close_port():
         size = session.query(Port).count()
         session.query(Traffic) \
                 .filter(Traffic.port_from_id == port_id) \
+                .filter(Traffic.port_to_id != port_id) \
                 .update({
-                    "proportion": 0 if Traffic.port_to_id == port_id else 1
+                    "proportion": 0
                 })
+        session.query(Traffic) \
+                .filter(Traffic.port_from_id == port_id) \
+                .filter(Traffic.port_to_id == port_id) \
+                .update({
+                    "proportion": 1
+                })
+        session.commit()
     
     # set other entries in the column to be 0 and calculate new matrix
     col = []
