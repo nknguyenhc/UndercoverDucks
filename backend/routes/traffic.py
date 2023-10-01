@@ -605,6 +605,14 @@ def close_port():
 @traffic.route('/reset', methods=['POST'])
 @login_required
 def reset():
+    # renew the tables
+    Similarity.__table__.drop(engine)
+    Traffic.__table__.drop(engine)
+    Port.__table__.drop(engine)
+    Port.metadata.create_all(engine)
+    Traffic.metadata.create_all(engine)
+    Similarity.metadata.create_all(engine)
+
     init_traffic_data()
     return dumps({
         "message": "success"
