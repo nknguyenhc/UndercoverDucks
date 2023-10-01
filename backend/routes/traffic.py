@@ -301,7 +301,7 @@ def set_similarity():
     
     with Session(engine) as session:
         stmt = select(Similarity).where(Similarity.port_from_id == port_from_id)
-        sum = 0
+        sum = new_similarity
         for similarity in session.scalars(stmt):
             if similarity.port_to_id != port_to_id:
                 sum += similarity.value
