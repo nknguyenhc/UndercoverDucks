@@ -5,6 +5,7 @@ import Simulate from "../pages/simulation";
 import ViewPort from "../components/viewPort/viewPort";
 import DateDisplay from "../components/greet/date";
 import TrafficInfo from "../components/traffic/traffic-info";
+import TrafficEditBulk from "../components/traffic/traffic-edit-bulk";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +29,10 @@ const router = createBrowserRouter([
           },
           {
             path: 'traffic-info/',
-            element: <TrafficInfo />,
+            element: <>
+              <TrafficEditBulk />
+              <TrafficInfo />
+            </>,
           }
         ],
       },
