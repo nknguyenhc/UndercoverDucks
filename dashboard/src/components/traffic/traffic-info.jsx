@@ -1,7 +1,14 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import arrowRight from './arrow-right.png';
+import { PageContext } from '../../pages/simulation';
 
-export default function TrafficInfo({ portFrom, portTo }) {
+export default function TrafficInfo() {
+    const { portFrom, portTo } = useContext(PageContext);
+
+    if (!portFrom || !portTo) {
+        return <div>Please select 2 ports</div>;
+    }
+
     return <div className="traffic">
         <div className="traffic-header">
             <div className="traffic-header-text">

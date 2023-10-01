@@ -1,9 +1,8 @@
-import React, { PureComponent } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Graph({data}) {
     return (
-        <ResponsiveContainer width="40%" height="100%" minWidth="300px" minHeight="300px">
+        <ResponsiveContainer width="95%" height="90%" minWidth="200px" minHeight="300px">
             <LineChart
                 width={500}
                 height={300}

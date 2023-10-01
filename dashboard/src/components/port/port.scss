@@ -3,6 +3,15 @@
     flex-direction: row;
     gap: 9px;
     align-items: center;
+    border-radius: 10px;
+
+    &:hover {
+        background-color: #d3d3d3;
+    }
+
+    &-highlight {
+        background-color: #9A9A9A !important;
+    }
 
     &-country {
         display: flex;
@@ -99,7 +108,7 @@
             &-container {
                 width: fit-content;
                 user-select: none;
-                width: 160px;
+                width: 180px;
             }
 
             &-list {
@@ -109,7 +118,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
-                padding: 8px;
+                padding: 8px 0px;
                 border-radius: 5px;
                 border: 1px solid $color-lightgrey;
                 background-color: white;
@@ -121,7 +130,18 @@
             }
 
             &-item {
+                padding: 0px 8px;
                 font-size: 15px;
+                font-weight: 500;
+                color: $color-lightgrey;
+
+                &:hover {
+                    background-color: #e1e1e1;
+                }
+
+                &-highlight {
+                    background-color: #b7b6b6 !important;
+                }
             }
         }
     }

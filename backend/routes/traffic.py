@@ -20,7 +20,7 @@ def get_port(port_id):
         return {
             "id": port.id,
             "name": port.name,
-            "country_code": port.country_code,
+            "country": port.country_code,
             "volume": port.volume,
         }
 
@@ -33,7 +33,7 @@ def get_all():
             lambda port: {
                 "id": port.id,
                 "name": port.name,
-                "country_code": port.country_code,
+                "country": port.country_code,
                 "volume": port.volume,
             },
             session.scalars(portStmt)

@@ -2,6 +2,9 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import Login from "../components/login/login";
 import Simulate from "../pages/simulation";
+import ViewPort from "../components/viewPort/viewPort";
+import DateDisplay from "../components/greet/date";
+import TrafficInfo from "../components/traffic/traffic-info";
 
 const router = createBrowserRouter([
   {
@@ -10,7 +13,24 @@ const router = createBrowserRouter([
     children: [
       {
         path: '',
-        element: <Simulate />
+        element: <Simulate />,
+        children: [
+          {
+            path: 'dashboard/',
+            element: <>
+              <DateDisplay />
+              <ViewPort />
+            </>,
+          },
+          {
+            path: 'ports/',
+            element: <ViewPort />,
+          },
+          {
+            path: 'traffic-info/',
+            element: <TrafficInfo />,
+          }
+        ],
       },
       {
         path: 'user/',

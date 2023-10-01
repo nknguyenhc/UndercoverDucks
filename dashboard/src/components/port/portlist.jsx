@@ -8,7 +8,7 @@ export default function PortList({
     sortMethods,
 }) {
     const colors = ['pink', 'yellow', 'green'];
-    const [sortMethodIndex, setSortMethodIndex] = useState(0);
+    const [sortMethodIndex, setSortMethodIndex] = useState(-1);
     const [showSort, setShowSort] = useState(false);
 
     const handleClick = useCallback((newIndex) => {
@@ -21,20 +21,20 @@ export default function PortList({
         <div className="portlist-header">
             <div className="portlist-header-top">
                 <div className="portlist-header-title">Ports</div>
-                {caption && <div className="portlist-header-caption">
+                <div className="portlist-header-caption">
                     {caption}
-                </div>}
+                </div>
             </div>
-            {sortMethods && <div className="portlist-header-sort-container">
+            <div className="portlist-header-sort-container">
                 <div className="portlist-header-sort" onClick={() => setShowSort(showSort => !showSort)}>
-                    <div>Sorted by: {sortMethods[sortMethodIndex].name}</div>
+                    <div>Sorted by: {sortMethodIndex > -1 ? sortMethods[sortMethodIndex].name : "not selected"}</div>
                     <img src={arrowDown} className={showSort ? "inverted" : ""} alt="" />
                 </div>
                 <div className="portlist-header-sort-list-container">
                     {showSort &&<div className="portlist-header-sort-list">
                         {sortMethods.map((sortMethod, sortIndex) => (
                             <div 
-                                className="portlist-header-sort-item" 
+                                className={"portlist-header-sort-item" + (sortIndex === sortMethodIndex ? " portlist-header-sort-item-highlight" : "")}
                                 onClick={() => handleClick(sortIndex)}
                                 key={sortMethod.name}
                             >
@@ -43,11 +43,15 @@ export default function PortList({
                         ))}
                     </div>}
                 </div>
-            </div>}
+            </div>
         </div>
         <div className="portlist-list">
             {portlist.map((port, portIndex) => (
-                <Port port={port} key={port.name} bg={colors[portIndex % 3]} />
+                <Port
+                    port={port}
+                    key={port.name}
+                    bg={colors[portIndex % 3]}
+                />
             ))}
         </div>
     </div>;
