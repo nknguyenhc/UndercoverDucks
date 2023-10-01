@@ -146,24 +146,32 @@ def between():
 @traffic.route('/predict', methods=['GET'])
 @login_required
 def predict():
+    port_id = request.args["port_id"]
     number_of_weeks = request.args["weeks"]
     try:
+        port_id = int(port_id)
         number_of_weeks = int(number_of_weeks)
     except (ValueError, TypeError):
         return dumps({
-            "message": "invalid number of weeks provided"
+            "message": "invalid port id or number of weeks provided"
         }), 400
-    if (number_of_weeks < 0):
+    if number_of_weeks < 0 or number_of_weeks > 20:
         return dumps({
-            "message": "number of weeks not within valid range"
+            "message": "number of weeks not within valid range (0-20)"
         }), 400
     
     with Session(engine) as session:
+        size = session.query(Port).count()
+        if port_id <= 0 or port_id > size:
+            return dumps({
+                "message": "port id not within valid range (1-total_size)"
+            }), 400
         ports = session.query(Port).all()
         initial_volumes = list(map(lambda port: port.volume, ports))
     volumes = get_ship_proportions_over_time(initial_volumes, get_proportion_matrix(), number_of_weeks)
+    port_volumes = list(map(lambda vols: vols[port_id - 1], volumes))
     return dumps({
-        "volumes": volumes,
+        "volumes": port_volumes,
     })
 
 @traffic.route('/set-volume', methods=['POST'])
@@ -273,7 +281,7 @@ def set_similarity():
     
     if new_similarity < 0:
         return dumps({
-            "message": "similarity value is not within valid range"
+            "message": "similarity value is not within valid range (>=0)"
         }), 400
     
     with Session(engine) as session:
@@ -314,7 +322,7 @@ def set_proportion_row():
             proportion = float(port["proportion"])
             if proportion < 0 or proportion > 1:
                 return dumps({
-                    "message": "proportion not within valid range"
+                    "message": "proportion not within valid range (0-1)"
                 }), 400
             sum += proportion
             to_list.append({
@@ -395,7 +403,7 @@ def calculate_new_proportion_matrix_and_update_db(payload):
         delta_matrix = get_delta_matrix(payload)
     except NoResultFound:
         return dumps({
-            "message": "port id provided not within valid range"
+            "message": "port id provided not within valid range (1-total_size)"
         })
 
     # print(initial_matrix)
@@ -430,7 +438,7 @@ def set_proportion():
                 port_to["proportion"] = float(port_to["proportion"])
                 if port_to["proportion"] < 0 or port_to["proportion"] > 1:
                     return dumps({
-                        "message": "new_proportion not within valid range",
+                        "message": "new_proportion not within valid range (0-1)",
                     }), 400
     except (ValueError, TypeError):
         return dumps({
@@ -464,7 +472,7 @@ def add_port():
     
     if volume < 0:
         return dumps({
-            "message": "volume not within valid range"
+            "message": "volume not within valid range (>=0)"
         })
 
     with Session(engine) as session:
