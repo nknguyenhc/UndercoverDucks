@@ -21,7 +21,7 @@ users_bp = Blueprint('users', __name__)
 
 @users_bp.route('/')
 def index():
-    return "<h2>quack</h2>"
+    return render_template("index.html")
 
 @users_bp.route('/login', methods=["POST"])
 def login():
