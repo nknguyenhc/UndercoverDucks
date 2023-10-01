@@ -19,6 +19,19 @@
         text-transform: uppercase;
         font-size: 28px;
         color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+
+        &-icon {
+            height: 50px;
+            width: 50px;
+            img {
+                max-height: 100%;
+                max-width: 100%;
+            }
+        }
     }
 
     &-body {
