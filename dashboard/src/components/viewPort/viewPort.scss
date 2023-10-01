@@ -1,0 +1,74 @@
+.pin {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    align-items: left;
+    padding: 10px;
+    background-color: white;
+    border-radius: 30px;
+}
+
+.pinContainer {
+    display: flex;
+    flex: 1; 
+    flex-direction: row;
+    padding: 10px;
+    justify-content: space-between;
+}
+
+.pinDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pinName {
+    font-size: 30px;
+    font-weight: 500;
+}
+
+.pinCountry {
+    display: flex;
+    font-size: 12px;
+    font-weight: 500;
+    color: $color-lightgrey;
+}
+
+.pinVolume {
+    font-size: 16px;
+    color: $color-lightgrey;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.buttonContainer {
+    padding-top: 5px;
+    color: #1E1E1E;
+    background-color: transparent;
+    border: 0px;
+    font-size: 20px;
+    text-decoration: underline;
+}
+
+.predictions {
+    padding-left: 40px;
+}
+
+.editing-block {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.viewport-date-label {
+    text-align: center;
+}
+
+.viewport-editAndDeleteButtons {
+    justify-content: right;
+}

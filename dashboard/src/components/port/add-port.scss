@@ -1,0 +1,25 @@
+.addport {
+
+    &-modalButton {
+        position: absolute;
+        right: 30px;
+    }
+
+    &-textFields {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &-field {
+        padding: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 80%;
+    }
+
+    &-box {
+        width: 250px !important;
+    }
+    
+}

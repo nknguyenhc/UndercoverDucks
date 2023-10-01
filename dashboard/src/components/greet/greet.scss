@@ -1,0 +1,44 @@
+.greet {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    flex-shrink: 0;
+
+    &-icon {
+        height: 56px;
+        width: 56px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+            max-height: 100%;
+            max-width: 100%;
+        }
+    }
+
+    &-text {
+        font-size: 20px;
+        font-weight: 500;
+    }
+}
+
+.date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+
+    &-date {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    &-location {
+        font-size: 14px;
+        color: $color-lightgrey;
+    }
+}

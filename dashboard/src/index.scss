@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+// colors
+$color-pink: rgba(255, 199, 199, 0.50);
+$color-lightgrey: #6C6C6C;
+$color-yellow: rgba(255, 236, 64, 0.50);
+$color-green: rgba(65, 236, 113, 0.50);
+$color-blue: #37B3E2;
+
+.bg {
+  &-pink {
+    background-color: $color-pink;
+  }
+  &-lightgrey {
+    background-color: $color-lightgrey;
+  }
+  &-yellow {
+    background-color: $color-yellow;
+  }
+  &-green {
+    background-color: $color-green;
+  }
+  &-blue {
+    background-color: $color-blue;
+  }
+}
+
+.inverted {
+  transform-origin: 50% 50%;
+  transform: rotate(180deg);
+}
+
+@import './components/login/login.scss';
+@import './components/port/port.scss';
+@import './components/port/add-port.scss';
+@import './components/navbar/navbar.scss';
+@import './components/greet/greet.scss';
+@import './pages/simulation.scss';
+@import './components/viewPort/viewPort.scss';
+@import './components/viewPort/delete-port.scss';
+@import './components/traffic/traffic.scss';
+@import './components/traffic/traffic-edit-bulk.scss';
