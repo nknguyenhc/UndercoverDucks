@@ -45,7 +45,12 @@ export default function NavBar() {
 
     return <div className="navbar-container bg-blue">
         <div className="navbar-main">
-            <div className="navbar-top">Undercover Ducks</div>
+            <div className="navbar-top">
+                <div className="navbar-top-icon">
+                    <img src={process.env.PUBLIC_URL + "/favicon.ico"} alt="" />
+                </div>
+                Undercover Ducks
+            </div>
             <div className="navbar-body">
                 {navbarTabs.map((tab, tabIndex) => (
                     <div 
