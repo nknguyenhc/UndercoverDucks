@@ -50,7 +50,6 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
         ]))
             .then(res => {
                 if (res.status !== 200) {
-                    res.text().then(res => console.log(res));
                     alert("Something went wrong");
                     return;
                 }
