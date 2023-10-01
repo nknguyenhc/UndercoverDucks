@@ -2,7 +2,6 @@ import Port from "./port";
 import arrowDown from './arrow-down.svg';
 import { useCallback, useContext, useEffect, useState } from "react";
 import { PageContext } from "../../pages/simulation";
-import Modal from "../modal/modal";
 import AddPort from "./add-port";
 
 export default function PortList({

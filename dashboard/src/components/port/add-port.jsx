@@ -1,5 +1,7 @@
 import { Modal, Button } from "react-bootstrap";
-import { useState } from "react"; 
+import { useCallback, useContext, useState } from "react"; 
+import { postContent } from '../../utils/request';
+import { PageContext } from "../../pages/simulation";
 
 export default function AddPort() {
 
@@ -11,9 +13,23 @@ export default function AddPort() {
     const [portCountry, setPortCountry] = useState(); 
     const [portVolume, setPortVolume] = useState(); 
 
-    const handleSubmit = () => {
-        closeModal(); 
-    }
+    const { refreshPorts } = useContext(PageContext);
+
+    const handleSubmit = useCallback(() => {
+        fetch('/traffic/add-port', postContent({
+            name: portName,
+            country_code: portCountry,
+            volume: portVolume,
+        }))
+            .then(res => {
+                if (res.status !== 200) {
+                    alert("Something went wrong");
+                    return;
+                }
+                refreshPorts();
+                closeModal();
+            });
+    }, [portName, portCountry, portVolume, refreshPorts]);
 
     return <>
         <div className="addport-modalButton">
@@ -60,7 +76,7 @@ export default function AddPort() {
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={closeModal}>
+                <Button variant="secondary" onClick={handleSubmit}>
                     Submit
                 </Button>
             </Modal.Footer>
