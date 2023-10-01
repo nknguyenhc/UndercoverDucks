@@ -50,7 +50,7 @@ export default function ViewPort() {
         setEditingPort(port);
     }, [port]);
 
-    useEffect(() => {
+    const refreshData = useCallback(() => {
         if (port) {
             fetch(`/traffic/predict?port_id=${port.id}&weeks=5`)
                 .then(res => {
@@ -69,6 +69,10 @@ export default function ViewPort() {
                 })
         }
     }, [port, dateToText]);
+
+    useEffect(() => {
+        refreshData();
+    }, [refreshData]);
 
     if (!port || (location.pathname === '/dashboard' && port.country !== 'SGP')) {
         return <div></div>;
@@ -127,7 +131,7 @@ export default function ViewPort() {
                 {!showTextbox
                     ? <div className="viewport-editAndDeleteButtons">
                         <button className='buttonContainer' onClick={handleEdit}>edit</button>
-                        <DeletePort/>
+                        <DeletePort refresh={refreshData} />
                     </div>
                     : <div className="buttons">
                         <button className='buttonContainer' onClick={handleSave}>save</button>

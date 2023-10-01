@@ -1,14 +1,27 @@
 import { Modal, Button } from "react-bootstrap";
-import { useState } from "react"; 
+import { useContext, useState } from "react"; 
+import { postContent } from '../../utils/request';
+import { PageContext } from "../../pages/simulation";
 
-export default function DeletePort() {
+export default function DeletePort({ refresh }) {
 
     const [isOpen, setIsOpen] = useState(false); 
     const openModal = () => { setIsOpen(true) }
     const closeModal = () => { setIsOpen(false) }
+    const portId = useContext(PageContext).highlightingPort.id;
 
     const handleConfirm = () => {
-        closeModal(); 
+        fetch('/traffic/close-port', postContent({
+            port_id: portId,
+        }))
+            .then(res => {
+                if (res.status !== 200) {
+                    alert("Something went wrong");
+                    return;
+                }
+                refresh();
+                closeModal();
+            })
     }
 
     const handleCancel = () => {
@@ -16,10 +29,8 @@ export default function DeletePort() {
     }
 
     return <>
-        <div className="deleteport-modalButton">
-            <div className="deleteport-modalButton" onClick={openModal}>
-                Shut down
-            </div>
+        <div className="deleteport-modalButton" onClick={openModal}>
+            Shut down
         </div>
         <Modal show={isOpen} onHide={closeModal}>
             <Modal.Header closeButton>

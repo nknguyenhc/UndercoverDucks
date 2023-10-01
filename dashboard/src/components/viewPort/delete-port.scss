@@ -1,10 +1,4 @@
 .deleteport {
-
-    &-modalButton {
-        position: absolute;
-        right: 30px;
-    }
-
     &-buttons {
         display: flex;
         flex-direction: row;
@@ -13,7 +7,7 @@
 
     &-modalButton {
         padding-top: 5px;
-        color: "#1E1E1E";
+        color: #1E1E1E;
         background-color: transparent;
         border: 0px;
         font-size: 18px;
