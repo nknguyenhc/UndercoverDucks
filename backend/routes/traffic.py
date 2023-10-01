@@ -60,7 +60,6 @@ def get_all():
                 "value": similarity.value
             }
             traffic.setdefault("similarity", similarity)
-        print(get_proportion_matrix())
         return dumps({
             "message": "success",
             "ports": ports,
@@ -152,11 +151,11 @@ def predict():
         number_of_weeks = int(number_of_weeks)
     except (ValueError, TypeError):
         return dumps({
-            "message": "Invalid number of weeks provided"
+            "message": "invalid number of weeks provided"
         }), 400
     if (number_of_weeks < 0):
         return dumps({
-            "message": "Number of weeks not within valid range"
+            "message": "number of weeks not within valid range"
         }), 400
     
     with Session(engine) as session:
@@ -269,12 +268,12 @@ def set_similarity():
         new_similarity = float(payload["similarity"])
     except (ValueError, TypeError):
         return dumps({
-            "message": "Invalid id or similarity value provided"
+            "message": "invalid id or similarity value provided"
         }), 400
     
     if new_similarity < 0:
         return dumps({
-            "message": "Similarity value is not within valid range"
+            "message": "similarity value is not within valid range"
         }), 400
     
     with Session(engine) as session:
@@ -285,7 +284,7 @@ def set_similarity():
                 sum += similarity.value
         if sum == 0:
             return dumps({
-                "message": "At least one similarity value from this port should be positive"
+                "message": "at least one similarity value from this port should be positive"
             }), 400
         session.query(Similarity) \
                 .filter(Similarity.port_from_id == port_from_id) \
@@ -379,8 +378,6 @@ def get_delta_matrix(payload):
             for port_to in row_change["port_to_list"]:
                 port_to_id = port_to["port_to_id"]
                 proportion = port_to["proportion"]
-                print(port_from_id)
-                print(port_to_id)
                 traffic = session.query(Traffic) \
                                  .filter(Traffic.port_from_id == port_from_id) \
                                  .filter(Traffic.port_to_id == port_to_id) \
@@ -394,7 +391,12 @@ def calculate_new_proportion_matrix_and_update_db(payload):
     # [{"port_from_id":<int>, "port_to_list":[{"port_to_id":<int>, "proportion"}]}]
     initial_matrix = get_proportion_matrix()
     similarity_matrix = get_similarity_matrix()
-    delta_matrix = get_delta_matrix(payload)
+    try:
+        delta_matrix = get_delta_matrix(payload)
+    except NoResultFound:
+        return dumps({
+            "message": "port id provided not within valid range"
+        })
 
     # print(initial_matrix)
     # print(similarity_matrix)
@@ -428,13 +430,13 @@ def set_proportion():
                 port_to["proportion"] = float(port_to["proportion"])
                 if port_to["proportion"] < 0 or port_to["proportion"] > 1:
                     return dumps({
-                        "message": "new_proportion not within range",
+                        "message": "new_proportion not within valid range",
                     }), 400
-
     except (ValueError, TypeError):
         return dumps({
             "message": "invalid port id or proportion provided",
         }), 400
+    
     return calculate_new_proportion_matrix_and_update_db(payload)
 
 @traffic.route('/add-port', methods=['POST'])
@@ -460,6 +462,11 @@ def add_port():
             "message": "invalid volume provided",
         }), 400
     
+    if volume < 0:
+        return dumps({
+            "message": "volume not within valid range"
+        })
+
     with Session(engine) as session:
         port = Port(
             name=name,
@@ -535,9 +542,17 @@ def close_port():
         size = session.query(Port).count()
         session.query(Traffic) \
                 .filter(Traffic.port_from_id == port_id) \
+                .filter(Traffic.port_to_id != port_id) \
                 .update({
-                    "proportion": 0 if Traffic.port_to_id == port_id else 1
+                    "proportion": 0
                 })
+        session.query(Traffic) \
+                .filter(Traffic.port_from_id == port_id) \
+                .filter(Traffic.port_to_id == port_id) \
+                .update({
+                    "proportion": 1
+                })
+        session.commit()
     
     # set other entries in the column to be 0 and calculate new matrix
     col = []
