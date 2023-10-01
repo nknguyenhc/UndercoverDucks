@@ -1,7 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import arrowRight from './arrow-right.png';
 import { PageContext } from '../../pages/simulation';
 import { postContent } from '../../utils/request';
+import infoIcon from './info-icon.png';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 export default function TrafficInfo() {
     const { portFrom, portTo } = useContext(PageContext);
@@ -105,6 +107,19 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
         }
     }, []);
 
+    const proportionTooltip = useMemo(() => (
+        <Tooltip>
+            Represents the proportion of ships arriving at {portTo.name} that is from {portFrom.name}
+        </Tooltip>
+    ), [portFrom, portTo]);
+
+    const diversionTooltip = useMemo(() => (
+        <Tooltip>
+            Represents the likelihood that ships from {portFrom.name} that fail to arrive at its destination
+            being diverted to {portTo.name}
+        </Tooltip>
+    ), [portFrom, portTo]);
+
     useEffect(() => {
         if (isJustEditedBulk) {
             setIsJustEditedBulk(false);
@@ -123,7 +138,14 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
             </div>
             <div className="traffic-body-block-details">
                 <div className="traffic-body-block-block">
-                    <div className="traffic-body-block-block-text">Proportion index:</div>
+                    <div className="traffic-body-block-block-label">
+                        <div className="traffic-body-block-block-text">Proportion index:</div>
+                        <div className="traffic-body-block-block-icon">
+                            <OverlayTrigger placement='top' overlay={proportionTooltip}>
+                                <img src={infoIcon} alt="info" />
+                            </OverlayTrigger>
+                        </div>
+                    </div>
                     <div className="traffic-body-block-block-stats">
                         {isEditing 
                         ? <input 
@@ -138,7 +160,14 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
                     </div>
                 </div>
                 <div className="traffic-body-block-block">
-                    <div className="traffic-body-block-block-text">Diversion index:</div>
+                    <div className="traffic-body-block-block-label">
+                        <div className="traffic-body-block-block-text">Diversion index:</div>
+                        <div className="traffic-body-block-block-icon">
+                            <OverlayTrigger placement='top' overlay={diversionTooltip}>
+                                <img src={infoIcon} alt="info" />
+                            </OverlayTrigger>
+                        </div>
+                    </div>
                     <div className="traffic-body-block-block-stats">
                         {isEditing && !isEditingBulk
                         ? <input 
