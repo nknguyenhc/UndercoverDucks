@@ -99,6 +99,12 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
             })
     }, [portFrom, portTo]);
 
+    const handleProportion = useCallback(value => {
+        if (!isNaN(value) && Number(value) >= 0 && Number(value) <= 1) {
+            setProportionTempValue(value);
+        }
+    }, []);
+
     useEffect(() => {
         if (isJustEditedBulk) {
             setIsJustEditedBulk(false);
@@ -124,7 +130,7 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
                             type="number"
                             className="traffic-body-block-block-input form-control"
                             value={proportionTempValue} 
-                            onChange={e => setProportionTempValue(e.target.value)}
+                            onChange={e => handleProportion(e.target.value)}
                         /> 
                         : isEditingBulk
                         ? proportionTempValue

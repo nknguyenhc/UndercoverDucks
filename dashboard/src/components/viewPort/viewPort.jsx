@@ -105,7 +105,7 @@ export default function ViewPort() {
                             onChange={(e) => {
                                 setEditingPort(editingPort => ({
                                     ...editingPort,
-                                    country: e.target.value,
+                                    country: e.target.value.slice(0, 3).toUpperCase(),
                                 }));
                             }}>
                         </input>
@@ -116,12 +116,15 @@ export default function ViewPort() {
                     : <div className="editing-block">
                         <div>Volume</div>
                         <input className="form-control" 
+                            type="number"
                             value={editingPort.volume} 
                             onChange={(e) => {
-                                setEditingPort(editingPort => ({
-                                    ...editingPort,
-                                    volume: e.target.value,
-                                }));
+                                if (Number.isInteger(Number(e.target.value)) && Number(e.target.value) >= 0) {
+                                    setEditingPort(editingPort => ({
+                                        ...editingPort,
+                                        volume: e.target.value,
+                                    }));
+                                }
                             }}>
                         </input>
                     </div>
