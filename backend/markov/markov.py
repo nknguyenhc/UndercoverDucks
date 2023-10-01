@@ -3,7 +3,7 @@ import numpy as np
 ## for the change matrix, a[i][j] means the probability of going to port[i], given it is in port[j]
 def get_ship_proportions_over_time(initial, change, num_of_iterations):
     changeiter = np.eye(len(change))
-    list_of_iter = []
+    list_of_iter = [initial]
     for i in range(num_of_iterations):
         changeiter = np.dot(changeiter, change) 
         list_of_iter.append(np.dot(initial, changeiter))
