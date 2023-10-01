@@ -18,10 +18,11 @@ load_dotenv(dotenv_path)
 
 if __name__ == '__main__':
     with Session(engine) as session:
+        session.query(UserAuth).delete()
         test_user = UserAuth(
             username="test",
             password_hash=generate_password_hash("test"),
         )
-        session.add_all([test_user])
+        session.add(test_user)
         session.commit()
     

@@ -135,6 +135,11 @@ def init_similarity(df):
         session.commit()
 
 def init_traffic_data():
+    with Session(engine) as session:
+        session.query(Traffic).delete()
+        session.query(Similarity).delete()
+        session.query(Port).delete()
+        session.commit()
     port_info_df = pd.read_excel(INIT_PORT_INFO_PATH)
     proportion_df = pd.read_excel(INIT_PROPORTION_PATH)
     similarity_df = pd.read_excel(INIT_SIMILARITY_PATH)

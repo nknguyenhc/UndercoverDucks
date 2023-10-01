@@ -605,11 +605,6 @@ def close_port():
 @traffic.route('/reset', methods=['POST'])
 @login_required
 def reset():
-    with Session(engine) as session:
-        session.query(Traffic).delete()
-        session.query(Similarity).delete()
-        session.query(Port).delete()
-        session.commit()
     init_traffic_data()
     return dumps({
         "message": "success"
