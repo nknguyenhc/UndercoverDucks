@@ -174,27 +174,7 @@ def predict():
         "volumes": port_volumes,
     })
 
-@traffic.route('/set-volume', methods=['POST'])
-@login_required
-def set_volume():
-    payload = request.json
-    port_id = payload.get("port_id")
-    new_volume = payload.get("new_volume")
-    
-    try:
-        port_id = int(port_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_id provided",
-        }), 400
-    
-    try:
-        new_volume = int(new_volume)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid new_volume provided",
-        }), 400
-    
+def set_volume(port_id, new_volume):
     with Session(engine) as session:
         session.query(Port) \
             .filter(Port.id == port_id) \
@@ -202,29 +182,8 @@ def set_volume():
                 "volume": new_volume
             })
         session.commit()
-        return dumps({
-            "message": "success",
-        })
 
-@traffic.route('/set-name', methods=['POST'])
-@login_required
-def set_name():
-    payload = request.json
-    port_id = payload.get("port_id")
-    new_name = payload.get("new_name")
-
-    try:
-        port_id = int(port_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_id provided",
-        }), 400
-    
-    if type(new_name) != str:
-        return dumps({
-            "message": "invalid new_name provided", 
-        }), 400
-    
+def set_name(port_id, new_name):
     with Session(engine) as session:
         session.query(Port) \
             .filter(Port.id == port_id) \
@@ -232,29 +191,8 @@ def set_name():
                 "name": new_name
             })
         session.commit()
-        return dumps({
-            "message": "success",
-        })
     
-@traffic.route('/set-country-code', methods=['POST'])
-@login_required
-def set_country_code():
-    payload = request.json
-    port_id = payload.get("port_id")
-    new_country_code = payload.get("new_country_code")
-
-    try:
-        port_id = int(port_id)
-    except (ValueError, TypeError):
-        return dumps({
-            "message": "invalid port_id provided",
-        }), 400
-    
-    if type(new_country_code) != str:
-        return dumps({
-            "message": "invalid new_country_code provided", 
-        }), 400
-    
+def set_country_code(port_id, new_country_code):
     with Session(engine) as session:
         session.query(Port) \
             .filter(Port.id == port_id) \
@@ -262,9 +200,65 @@ def set_country_code():
                 "country_code": new_country_code
             })
         session.commit()
+
+@traffic.route('/set-port-info', methods=['POST'])
+@login_required
+def set_port_info():
+    payload = request.json
+    try:
+        port_id = int(payload.get("port_id"))
+    except (ValueError, TypeError):
         return dumps({
-            "message": "success",
-        })
+            "message": "invalid port id provided"
+        }), 400
+    
+    update_dict = payload.get("update_dict")
+
+    with Session(engine) as session:
+        size = session.query(Port).count()
+        if port_id < 1 or port_id > size:
+            return dumps({
+                "message": "port_id not within valid range (1-total_size)"
+            }), 400
+
+    converted_dict = {set_volume: None, set_name: None, set_country_code: None}
+    if "volume" in update_dict:
+        new_volume = update_dict["volume"]
+        try:
+            new_volume = int(new_volume)
+        except (ValueError, TypeError):
+            return dumps({
+                "message": "invalid volume provided"
+            }), 400      
+        if new_volume < 0:
+            return dumps({
+                "message": "new volume not within valid range (>=0)"
+            }), 400
+        converted_dict[set_volume] = new_volume
+
+    if "name" in update_dict:
+        new_name = update_dict["name"]  
+        if type(new_name) != str or len(new_name) <= 0:
+            return dumps({
+                "message": "invalid new name provided"
+            }), 400
+        converted_dict[set_name] = new_name
+
+    if "country" in update_dict:
+        new_country = update_dict["country"]  
+        if type(new_country) != str or len(new_country) <= 0:
+            return dumps({
+                "message": "invalid new country provided"
+            }), 400
+        converted_dict[set_country_code] = new_country
+
+    for entry in converted_dict.items():
+        if entry[1] is not None:
+            entry[0](port_id, entry[1])
+    
+    return dumps({
+        "message": "success"
+    })
 
 @traffic.route('/set-similarity', methods=['POST'])
 @login_required
@@ -455,11 +449,11 @@ def add_port():
     country_code = payload.get("country_code")
     volume = payload.get("volume")
 
-    if type(name) != str:
+    if type(name) != str or len(name) <= 0:
         return dumps({
             "message": "invalid name provided",
         }), 400
-    if type(country_code) != str:
+    if type(country_code) != str or len(country_code) <= 0:
         return dumps({
             "message": "invalid country code provided",
         }), 400
