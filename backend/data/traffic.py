@@ -13,6 +13,7 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 from db.traffic import Port, Traffic, Similarity
+from migrations import engine
 
 
 dotenv_path = join(dirname(__file__), '../.env')
@@ -133,9 +134,7 @@ def init_similarity(df):
                 session.add(similarity)
         session.commit()
 
-if __name__ == '__main__':
-    engine = create_engine(os.environ.get("DATABASE_URL"), echo=os.environ.get("DEBUG") == "True")
-
+def init_traffic_data():
     port_info_df = pd.read_excel(INIT_PORT_INFO_PATH)
     proportion_df = pd.read_excel(INIT_PROPORTION_PATH)
     similarity_df = pd.read_excel(INIT_SIMILARITY_PATH)
@@ -152,3 +151,5 @@ if __name__ == '__main__':
         init_proportion(proportion_df)
         init_similarity(similarity_df)
 
+if __name__ == '__main__':
+    init_traffic_data()

@@ -7,6 +7,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
 from db.traffic import Port, Traffic, Similarity
+from data.traffic import init_traffic_data
 from markov.markov import get_ship_proportions_over_time, get_new_change
 from migrations import engine
 
@@ -600,3 +601,16 @@ def close_port():
         ]
     }, col))
     return calculate_new_proportion_matrix_and_update_db(payload)
+
+@traffic.route('/reset', methods=['POST'])
+@login_required
+def reset():
+    with Session(engine) as session:
+        session.query(Traffic).delete()
+        session.query(Similarity).delete()
+        session.query(Port).delete()
+        session.commit()
+    init_traffic_data()
+    return dumps({
+        "message": "success"
+    })
