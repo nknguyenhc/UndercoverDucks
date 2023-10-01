@@ -1,6 +1,7 @@
 import Port from "./port";
 import arrowDown from './arrow-down.svg';
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { PageContext } from "../../pages/simulation";
 
 export default function PortList({
     portlist,
@@ -10,12 +11,20 @@ export default function PortList({
     const colors = ['pink', 'yellow', 'green'];
     const [sortMethodIndex, setSortMethodIndex] = useState(-1);
     const [showSort, setShowSort] = useState(false);
+    const { isNewLocation, setIsNewLocation } = useContext(PageContext);
 
     const handleClick = useCallback((newIndex) => {
         setSortMethodIndex(newIndex);
         sortMethods[newIndex].sort();
         setShowSort(false);
     }, [sortMethods]);
+
+    useEffect(() => {
+        if (isNewLocation) {
+            setIsNewLocation(false);
+            setSortMethodIndex(-1);
+        }
+    }, [isNewLocation, setIsNewLocation]);
 
     return <div className="portlist">
         <div className="portlist-header">

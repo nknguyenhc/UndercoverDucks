@@ -10,29 +10,9 @@ export default function Simulate() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [portlist, setPortlist] = useState([
-        {
-            name: "Tanjong Pagar Terminal",
-            country: "SGP",
-            volume: 1000,
-        },
-        {
-            name: "Keppel Terminal",
-            country: "SGP",
-            volume: 500,
-        },
-        {
-            name: "Pasir Panjang Terminal",
-            country: "SGP",
-            volume: 400,
-        },
-        {
-            name: "Port of Amsterdam",
-            country: "SGP",
-            volume: 1000,
-        },
-    ]);
+    const [portlist, setPortlist] = useState([]);
     const [filteredPortlist, setFilteredPortlist] = useState(portlist);
+    const [isNewLocation, setIsNewLocation] = useState(true);
 
     useEffect(() => {
         fetch('/user/status')
@@ -54,7 +34,7 @@ export default function Simulate() {
             })
     }, [navigate, location]);
 
-    useEffect(() => {
+    const refreshPorts = useCallback(() => {
         if (isAuthenticated) {
             fetch('/traffic/')
                 .then(res => {
@@ -64,6 +44,7 @@ export default function Simulate() {
                     }
                     res.json().then(res => {
                         setPortlist(res.ports);
+                        setIsNewLocation(true);
                         if (location.pathname === '/' || location.pathname.startsWith('/dashboard')) {
                             setFilteredPortlist(res.ports.filter(port => port.country === 'SGP'));
                         } else {
@@ -72,7 +53,11 @@ export default function Simulate() {
                     })
                 });
         }
-    }, [isAuthenticated, location])
+    }, [isAuthenticated, location]);
+
+    useEffect(() => {
+        refreshPorts();
+    }, [refreshPorts]);
 
     const sortMethods = useMemo(() => [
         {
@@ -149,9 +134,13 @@ export default function Simulate() {
                 <PageContext.Provider
                     value={{
                         highlightingPort,
+                        setHighlightingPort,
                         handlePortSelect,
                         portFrom,
                         portTo,
+                        refreshPorts,
+                        isNewLocation,
+                        setIsNewLocation,
                     }}
                 >
                     <PortList 

@@ -1,6 +1,7 @@
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import arrowRight from './arrow-right.png';
 import { PageContext } from '../../pages/simulation';
+import { postContent } from '../../utils/request';
 
 export default function TrafficInfo() {
     const { portFrom, portTo } = useContext(PageContext);
@@ -30,22 +31,73 @@ export default function TrafficInfo() {
 
 const TrafficInfoBlock = ({ portFrom, portTo }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [volumeValue, setVolumeValue] = useState(400);
-    const [volumeTempValue, setVolumeTempValue] = useState(400);
-    const [diversionIndex, setDiversionIndex] = useState(4.1);
-    const [diversionTempIndex, setDiversionTempIndex] = useState(4.1);
+    const [proportionIndex, setProportionIndex] = useState(0);
+    const [proportionTempValue, setProportionTempValue] = useState(0);
+    const [diversionIndex, setDiversionIndex] = useState(0);
+    const [diversionTempIndex, setDiversionTempIndex] = useState(0);
 
     const handleSave = useCallback(() => {
-        setIsEditing(false);
-        setVolumeTempValue(volumeValue);
-        setDiversionTempIndex(diversionIndex);
-    }, [volumeValue, diversionIndex]);
+        fetch('/traffic/set-proportion', postContent([
+            {
+                port_from_id: portFrom.id,
+                port_to_list: [
+                    {
+                        port_to_id: portTo.id,
+                        proportion: proportionTempValue,
+                    },
+                ],
+            },
+        ]))
+            .then(res => {
+                if (res.status !== 200) {
+                    res.text().then(res => console.log(res));
+                    alert("Something went wrong");
+                    return;
+                }
+                res.json().then(res => {
+                    setProportionIndex(proportionTempValue);
+                })
+                    .then(() => fetch('/traffic/set-similarity', postContent({
+                        port_from_id: portFrom.id,
+                        port_to_id: portTo.id,
+                        similarity: diversionTempIndex,
+                    })))
+                    .then(res => {
+                        if (res.status !== 200) {
+                            alert("Something went wrong");
+                            return;
+                        }
+                        res.json().then(res => {
+                            setIsEditing(false);
+                            setDiversionIndex(diversionTempIndex);
+                        });
+                    });
+            })
+    }, [proportionTempValue, diversionTempIndex, portFrom, portTo]);
 
     const handleCancel = useCallback(() => {
         setIsEditing(false);
-        setVolumeTempValue(volumeValue);
+        setProportionTempValue(proportionIndex);
         setDiversionTempIndex(diversionIndex);
-    }, [volumeValue, diversionIndex]);
+    }, [proportionIndex, diversionIndex]);
+
+    const refreshIndices = useCallback(() => {
+        fetch(`/traffic/between?port_from_id=${portFrom.id}&port_to_id=${portTo.id}`)
+            .then(res => {
+                if (res.status !== 200) {
+                    alert("Something went wrong");
+                    return;
+                }
+                res.json().then(res => {
+                    setProportionIndex(res.traffic.proportion);
+                    setProportionTempValue(res.traffic.proportion);
+                })
+            })
+    }, [portFrom, portTo]);
+
+    useEffect(() => {
+        refreshIndices();
+    }, [refreshIndices]);
 
     return <div className="traffic-body-block">
         <div className="traffic-body-block-main">
@@ -58,16 +110,16 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
             </div>
             <div className="traffic-body-block-details">
                 <div className="traffic-body-block-block">
-                    <div className="traffic-body-block-block-text">Number of ships:</div>
+                    <div className="traffic-body-block-block-text">Proportion index:</div>
                     <div className="traffic-body-block-block-stats">
                         {isEditing 
                         ? <input 
                             type="number"
                             className="traffic-body-block-block-input form-control"
-                            value={volumeTempValue} 
-                            onChange={e => setVolumeTempValue(e.target.value)}
+                            value={proportionTempValue} 
+                            onChange={e => setProportionTempValue(e.target.value)}
                         /> 
-                        : volumeValue}
+                        : proportionIndex}
                     </div>
                 </div>
                 <div className="traffic-body-block-block">

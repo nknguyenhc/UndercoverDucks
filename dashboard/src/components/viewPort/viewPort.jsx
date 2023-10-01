@@ -2,38 +2,14 @@ import { useCallback , useContext, useEffect, useState } from "react";
 import Graph from "../pin/graph";
 import { PageContext } from "../../pages/simulation";
 import { useLocation } from "react-router-dom";
+import { postContent } from '../../utils/request';
 
 export default function ViewPort() {
     const [showTextbox , setShowTextbox] = useState(false); 
     const port = useContext(PageContext).highlightingPort;
+    const { setHighlightingPort, refreshPorts } = useContext(PageContext);
     const [editingPort, setEditingPort] = useState(port);
-    const data = [
-        {
-          name: '30 Sep',
-          ships: 4000,
-          amt: 2400,
-        },
-        {
-          name: '7 Oct',
-          ships: 3000,
-          amt: 2210,
-        },
-        {
-          name: '14 Oct',
-          ships: 2000,
-          amt: 2290,
-        },
-        {
-          name: '21 Oct',
-          ships: 2780,
-          amt: 2000,
-        },
-        {
-          name: '28 Oct',
-          ships: 1890,
-          amt: 2181,
-        },
-    ];
+    const [data, setData] = useState([]);
     const location = useLocation();
 
     const handleCancel = useCallback(() => {
@@ -42,18 +18,58 @@ export default function ViewPort() {
     }, [port]);
 
     const handleSave = useCallback(() => {
-        setShowTextbox(false);
-    }, []);
+        fetch('/traffic/set-port-info', postContent({
+            port_id: port.id,
+            update_dict: {
+                name: editingPort.name,
+                volume: editingPort.volume,
+                country: editingPort.country,
+            },
+        }))
+            .then(res => {
+                if (res.status !== 200) {
+                    alert("Something went wrong");
+                    return;
+                }
+                setShowTextbox(false);
+                refreshPorts();
+                setHighlightingPort(editingPort);
+            })
+    }, [port, editingPort, refreshPorts, setHighlightingPort]);
     
     const handleEdit = useCallback(() => {
         setShowTextbox(true);
     }, []);
 
+    const dateToText = useCallback(date => 
+            `${new Date(date).getDate()}/${new Date(date).getMonth() + 1}`, 
+            []);
+
     useEffect(() => {
         setEditingPort(port);
     }, [port]);
 
-    if (!port || (location.pathname === '/ports' && port.country !== 'SGP')) {
+    useEffect(() => {
+        if (port) {
+            fetch(`/traffic/predict?port_id=${port.id}&weeks=5`)
+                .then(res => {
+                    if (res.status !== 200) {
+                        alert("Something went wrong");
+                        return;
+                    }
+                    res.json().then(res => {
+                        const current = new Date();
+                        const oneWeek = 1000 * 3600 * 24 * 7;
+                        setData(res.volumes.map((volume, index) => ({
+                            name: dateToText(current.getTime() + index * oneWeek),
+                            ships: volume,
+                        })));
+                    })
+                })
+        }
+    }, [port, dateToText]);
+
+    if (!port || (location.pathname === '/dashboard' && port.country !== 'SGP')) {
         return <div></div>;
     }
 
@@ -117,8 +133,9 @@ export default function ViewPort() {
             </div>
         </div>
         <div>
-            <div className="predictions">Predictions</div>
+            <div className="predictions">Volume</div>
             <Graph data={data} />
+            <div className="viewport-date-label">Date</div>
         </div>
     </div>;
 }

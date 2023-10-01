@@ -2,7 +2,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 export default function Graph({data}) {
     return (
-        <ResponsiveContainer width="95%" height="90%" minWidth="200px" minHeight="300px">
+        <ResponsiveContainer width="95%" height="75%" minWidth="200px" minHeight="300px">
             <LineChart
                 width={500}
                 height={300}
