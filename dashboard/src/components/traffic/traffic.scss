@@ -1,0 +1,130 @@
+.traffic {
+    padding: 27px 40px;
+    background-color: white;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex-grow: 1;
+
+    &-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        &-text {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        &-indicator {
+            font-size: 20px;
+            font-weight: 500;
+            color: $color-lightgrey;
+        }
+
+        &-name {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        &-countries {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+
+        &-country {
+            width: 68px;
+            height: 81px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    &-body {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+
+        &-block {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 24px;
+
+            &-main {
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                flex-grow: 1;
+            }
+
+            &-details {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            &-block {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+
+                &-text {
+                    color: $color-lightgrey;
+                }
+
+                &-stats {
+                    font-weight: 500;
+                    font-size: 20px;
+                }
+
+                &-input {
+                    width: 100px !important;
+                }
+            }
+
+            &-edit {
+                text-decoration: underline;
+                padding-top: 30px;
+                cursor: pointer;
+                width: 50px;
+            }
+
+            &-editing {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding-top: 30px;
+                width: 50px;
+
+                &-button {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+            }
+        }
+
+        &-indicator {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+
+            &-text {
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            &-icon {
+                height: 20px;
+                img {
+                    max-height: 100%;
+                }
+            }
+        }
+    }
+}
