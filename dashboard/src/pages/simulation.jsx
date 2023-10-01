@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import PortList from "../components/port/portlist";
 import NavBar from "../components/navbar/navbar";
 import Greet from "../components/greet/greet";
+import Reset from "../components/reset/reset";
 
 export const PageContext = createContext(null);
 
@@ -156,10 +157,18 @@ export default function Simulate() {
         setProportionList([]);
     }, []);
 
+    const handleResetData = useCallback(() => {
+        refreshPorts();
+        navigate('/dashboard');
+    }, [refreshPorts, navigate])
+
     return <div className="simulation">
         <NavBar />
         <div className="simulation-page">
-            <Greet />
+            <div className="simulation-page-top">
+                <Greet />
+                <Reset refresh={handleResetData} />
+            </div>
             <div className="simulation-page-body">
                 <PageContext.Provider
                     value={{
