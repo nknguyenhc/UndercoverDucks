@@ -47,7 +47,7 @@
 
 .buttonContainer {
     padding-top: 5px;
-    color: "#1E1E1E";
+    color: #1E1E1E;
     background-color: transparent;
     border: 0px;
     font-size: 20px;
@@ -67,4 +67,8 @@
 
 .viewport-date-label {
     text-align: center;
+}
+
+.viewport-editAndDeleteButtons {
+    justify-content: right;
 }
