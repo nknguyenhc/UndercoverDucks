@@ -6,6 +6,7 @@ import Greet from "../components/greet/greet";
 import DateDisplay from "../components/greet/date";
 import Pin from "../components/pin/pin";
 import ViewPort from "../components/viewPort/viewPort";
+import TrafficInfo from "../components/traffic/traffic-info";
 
 
 export default function Simulate() {
@@ -105,7 +106,8 @@ export default function Simulate() {
             <div className="simulation-page-body">
                 <PortList portlist={portlist} caption="Singapore" sortMethods={sortMethods} />
                 <div className="simulation-page-highlight">
-                    <DateDisplay />
+                    {/* <DateDisplay /> */}
+                    <TrafficInfo portFrom={portlist[0]} portTo={portlist[1]} />
                 </div>
             </div>
         </div>
