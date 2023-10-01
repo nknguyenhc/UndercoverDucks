@@ -130,8 +130,13 @@ def between():
             .where(Traffic.port_from_id == port_from_id) \
             .where(Traffic.port_to_id == port_to_id)
         
+        stmt2 = select(Similarity) \
+            .where(Similarity.port_from_id == port_from_id) \
+            .where(Similarity.port_to_id == port_to_id)
+        
         try:
             traffic_info = session.scalars(stmt).one()
+            similarity = session.scalars(stmt2).one()
         except NoResultFound:
             return dumps({
                 "message": "relationship specified is not found",
@@ -143,6 +148,7 @@ def between():
                 "port_from": port_from,
                 "port_to": port_to,
                 "proportion": traffic_info.proportion,
+                "similarity": similarity.value
             },
         })
 
@@ -419,12 +425,8 @@ def calculate_new_proportion_matrix_and_update_db(payload):
         return dumps({
             "message": "port id provided not within valid range (1-total_size)"
         })
-
-    # print(initial_matrix)
-    # print(similarity_matrix)
-    # print(delta_matrix)
+    
     new_matrix = get_new_change(initial_matrix, delta_matrix, similarity_matrix)
-    # print(new_matrix)
     with Session(engine) as session:
         for from_id, row in enumerate(new_matrix):
             for to_id, proportion in enumerate(row):
