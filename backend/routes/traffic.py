@@ -10,6 +10,9 @@ from db.traffic import Port, Traffic, Similarity
 from markov.markov import get_ship_proportions_over_time, get_new_change
 from migrations import engine
 
+KEY_ERROR_RESPONSE = dumps({
+    "message": "key error caused by malformed request"
+}), 400
 
 traffic = Blueprint('traffic', __name__)
 
@@ -49,8 +52,8 @@ def get_all():
             session.scalars(trafficStmt)
         ))
         for traffic in traffics:
-            from_id = traffic["port_from_id"]
-            to_id = traffic["port_to_id"]
+            from_id = traffic.get("port_from_id")
+            to_id = traffic.get("port_to_id")
             stmt = select(Similarity).where((Similarity.port_from_id == from_id) & (Similarity.port_to_id == to_id))
             similarity = session.scalars(stmt).one()
             similarity = {
@@ -146,8 +149,9 @@ def between():
 @traffic.route('/predict', methods=['GET'])
 @login_required
 def predict():
-    port_id = request.args["port_id"]
-    number_of_weeks = request.args["weeks"]
+    port_id = request.args.get("port_id")
+    number_of_weeks = request.args.get("weeks")
+    
     try:
         port_id = int(port_id)
         number_of_weeks = int(number_of_weeks)
@@ -206,14 +210,18 @@ def set_country_code(port_id, new_country_code):
 def set_port_info():
     payload = request.json
     try:
-        port_id = int(payload.get("port_id"))
+        port_id = payload.get("port_id")
+        update_dict = payload.get("update_dict")
+    except KeyError:
+        return KEY_ERROR_RESPONSE
+
+    try:
+        port_id = int(port_id)
     except (ValueError, TypeError):
         return dumps({
             "message": "invalid port id provided"
         }), 400
     
-    update_dict = payload.get("update_dict")
-
     with Session(engine) as session:
         size = session.query(Port).count()
         if port_id < 1 or port_id > size:
@@ -223,7 +231,7 @@ def set_port_info():
 
     converted_dict = {set_volume: None, set_name: None, set_country_code: None}
     if "volume" in update_dict:
-        new_volume = update_dict["volume"]
+        new_volume = update_dict.get("volume")
         try:
             new_volume = int(new_volume)
         except (ValueError, TypeError):
@@ -237,7 +245,7 @@ def set_port_info():
         converted_dict[set_volume] = new_volume
 
     if "name" in update_dict:
-        new_name = update_dict["name"]  
+        new_name = update_dict.get("name")
         if type(new_name) != str or len(new_name) <= 0:
             return dumps({
                 "message": "invalid new name provided"
@@ -245,7 +253,7 @@ def set_port_info():
         converted_dict[set_name] = new_name
 
     if "country" in update_dict:
-        new_country = update_dict["country"]  
+        new_country = update_dict.get("country")
         if type(new_country) != str or len(new_country) <= 0:
             return dumps({
                 "message": "invalid new country provided"
@@ -265,9 +273,16 @@ def set_port_info():
 def set_similarity():
     payload = request.json
     try:
-        port_from_id = int(payload["port_from_id"])
-        port_to_id = int(payload["port_to_id"])
-        new_similarity = float(payload["similarity"])
+        port_from_id = payload.get("port_from_id")
+        port_to_id =payload.get("port_to_id")
+        new_similarity = payload.get("similarity")
+    except KeyError:
+        return KEY_ERROR_RESPONSE
+
+    try:
+        port_from_id = int(port_from_id)
+        port_to_id = int(port_to_id)
+        new_similarity = float(new_similarity)
     except (ValueError, TypeError):
         return dumps({
             "message": "invalid id or similarity value provided"
@@ -303,8 +318,12 @@ def set_similarity():
 @login_required
 def set_proportion_row():
     payload = request.json
-    port_from_id = payload.get("port_from_id")
-    port_to_list = payload.get("port_to_list")
+    try:
+        port_from_id = payload.get("port_from_id")
+        port_to_list = payload.get("port_to_list")
+    except KeyError:
+        return KEY_ERROR_RESPONSE
+    
     length = len(port_to_list)
 
     try:
@@ -312,8 +331,8 @@ def set_proportion_row():
         to_list = []
         sum = 0
         for port in port_to_list:
-            port_to_id = int(port["port_to_id"])
-            proportion = float(port["proportion"])
+            port_to_id = int(port.get("port_to_id"))
+            proportion = float(port.get("proportion"))
             if proportion < 0 or proportion > 1:
                 return dumps({
                     "message": "proportion not within valid range (0-1)"
@@ -333,19 +352,20 @@ def set_proportion_row():
                     "message": "invalid length of port_to_list",
                 }), 400
             for port in to_list:
-                port_to_id = int(port["port_to_id"])
+                port_to_id = int(port.get("port_to_id"))
                 session.query(Traffic) \
                        .filter((Traffic.port_from_id == port_from_id) & (Traffic.port_to_id == port_to_id)) \
-                       .update({"proportion": port["proportion"]})
+                       .update({"proportion": port.get("proportion")})
             session.commit()
         return dumps({
             "message": "success",
         })
-    
     except (ValueError, TypeError):
         return dumps({
             "message": "invalid port id or proportion provided"
         }), 400
+    except KeyError:
+        return KEY_ERROR_RESPONSE
 
 def get_proportion_matrix():
     with Session(engine) as session:
@@ -376,10 +396,10 @@ def get_delta_matrix(payload):
         size = session.query(Port).count()
         matrix = [[0 for i in range(size)] for j in range(size)]
         for row_change in payload:
-            port_from_id = row_change["port_from_id"]
-            for port_to in row_change["port_to_list"]:
-                port_to_id = port_to["port_to_id"]
-                proportion = port_to["proportion"]
+            port_from_id = row_change.get("port_from_id")
+            for port_to in row_change.get("port_to_list"):
+                port_to_id = port_to.get("port_to_id")
+                proportion = port_to.get("proportion")
                 traffic = session.query(Traffic) \
                                  .filter(Traffic.port_from_id == port_from_id) \
                                  .filter(Traffic.port_to_id == port_to_id) \
@@ -438,6 +458,8 @@ def set_proportion():
         return dumps({
             "message": "invalid port id or proportion provided",
         }), 400
+    except KeyError:
+        return KEY_ERROR_RESPONSE
     
     return calculate_new_proportion_matrix_and_update_db(payload)
 
@@ -445,9 +467,12 @@ def set_proportion():
 @login_required
 def add_port():
     payload = request.json
-    name = payload.get("name")
-    country_code = payload.get("country_code")
-    volume = payload.get("volume")
+    try:
+        name = payload.get("name")
+        country_code = payload.get("country_code")
+        volume = payload.get("volume")
+    except KeyError:
+        return KEY_ERROR_RESPONSE
 
     if type(name) != str or len(name) <= 0:
         return dumps({
@@ -530,7 +555,10 @@ def add_port():
 @login_required
 def close_port():
     payload = request.json
-    port_id = payload.get("port_id")
+    try:
+        port_id = payload.get("port_id")
+    except KeyError:
+        return KEY_ERROR_RESPONSE
 
     try:
         port_id = int(port_id)
