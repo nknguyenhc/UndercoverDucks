@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 from flask_login import LoginManager
 from dotenv import load_dotenv
 import os
@@ -26,8 +26,15 @@ def load_user(user_id):
     return User(user_id)
 
 @app.route("/")
+@app.route("/dashboard/")
+@app.route("/ports/")
+@app.route("/traffic-info/")
 def index():
     return render_template("index.html")
+
+@app.route("/favicon.ico/")
+def favicon():
+    return redirect("/static/assets/favicon.ico")
 
 if __name__ == '__main__':
     app.run(host=os.environ.get("HOST"), port=os.environ.get("PORT"), debug=os.environ.get("DEBUG") == "True")
