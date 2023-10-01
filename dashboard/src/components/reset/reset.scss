@@ -1,0 +1,12 @@
+.reset {
+    text-decoration: underline;
+    font-size: 25px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+}

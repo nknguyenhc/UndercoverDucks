@@ -1,8 +1,9 @@
 import Port from "./port";
 import arrowDown from './arrow-down.svg';
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { PageContext } from "../../pages/simulation";
 import AddPort from "./add-port";
+import { useLocation } from "react-router-dom";
 
 export default function PortList({
     portlist,
@@ -13,6 +14,8 @@ export default function PortList({
     const [sortMethodIndex, setSortMethodIndex] = useState(-1);
     const [showSort, setShowSort] = useState(false);
     const { isNewLocation, setIsNewLocation } = useContext(PageContext);
+    const location = useLocation();
+    const showCaption = useMemo(() => location.pathname === '/dashboard', [location]);
 
     const handleClick = useCallback((newIndex) => {
         setSortMethodIndex(newIndex);
@@ -31,9 +34,9 @@ export default function PortList({
         <div className="portlist-header">
             <div className="portlist-header-top">
                 <div className="portlist-header-title">Ports</div>
-                <div className="portlist-header-caption">
+                {showCaption && <div className="portlist-header-caption">
                     {caption}
-                </div>
+                </div>}
             </div>
             <div className="portlist-header-sort-container">
                 <div className="portlist-header-sort" onClick={() => setShowSort(showSort => !showSort)}>
