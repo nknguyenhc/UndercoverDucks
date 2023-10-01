@@ -2,6 +2,7 @@ import Port from "./port";
 import arrowDown from './arrow-down.svg';
 import { useCallback, useContext, useEffect, useState } from "react";
 import { PageContext } from "../../pages/simulation";
+import Modal from "../modal/modal";
 
 export default function PortList({
     portlist,
@@ -63,5 +64,6 @@ export default function PortList({
                 />
             ))}
         </div>
+        <Modal id='example' button={<h2>test</h2>} title="Hello" body={<h1>Hehe</h1>} />
     </div>;
 }
