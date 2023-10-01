@@ -1,0 +1,95 @@
+import numpy as np
+
+SGlist = [0.5843,    0.0076,    0.0183,    0.0312,    0.0263,    0.0637,    0.0035,    0.0216,    0.0932,    0.0071,    0.2330]
+CNlist = [0.1213,    0.9171,    0.0274,    0.0848,    0.0838,    0.0739,    0.0035,    0.0844,    0.3556,    0.0929,    0.1165]
+EGlist = [0.0740,    0.0013,    0.6393,    0.0631,    0.0072,    0.0647,    0.0098,    0.0569,    0.0173,    0.0071,    0.0049]
+USlist = [0.0192,    0.0458,    0.0320,    0.5047,    0.0328,    0.0246,    0.0294,    0.0072,    0.0115,    0.1857,    0.0631]
+SJlist = [0.0237,    0.0132,    0.0046,    0.1465,    0.7494,    0.0585,    0.0012,    0.0497,    0.2382,    0.0571,    0.0680]
+ARlist = [0.0695,    0.0026,    0.1370,    0.0015,    0.0135,    0.6160,    0.0012,    0.0168,    0.0173,    0.0071,    0.0777]
+EUlist = [0.0118,    0.0004,    0.0274,    0.0740,    0.0011,    0.0585,    0.9385,    0.0090,    0.0115,    0.0429,    0.0437]
+RUlist = [0.0015,    0.0028,    0.1005,    0.0022,    0.0165,    0.0072,    0.0110,    0.7449,    0.0012,    0.0071,    0.0049]
+AUlist = [0.0651,    0.0071,    0.0046,    0.0109,    0.0405,    0.0031,    0.0012,    0.0006,    0.2417,    0.0071,    0.0340]
+PAlist = [0.0015,    0.0013,    0.0046,    0.0725,    0.0272,    0.0010,    0.0004,    0.0042,    0.0035,    0.5786,    0.0049]
+SAlist = [0.0281,    0.0009,    0.0046,    0.0087,    0.0017,    0.0287,    0.0004,    0.0048,    0.0092,    0.0071,    0.3495]
+
+ALLlist = [SGlist, CNlist, EGlist, USlist, SJlist, ARlist, EUlist, RUlist, AUlist, PAlist, SAlist]
+
+
+def CDF(k, y):
+    if y < 0:
+        return 0
+    elif y >= 0 and y < k * k:
+        return 2 * math.sqrt(y)
+    elif y >= k * k and y < (1 - k) * (1 - k):
+        return math.sqrt(y) + k
+    else:
+        return 1
+
+def compare(xs1, xs2):
+    square_difference = (xs1[0] - xs2[0]) ** 2
+    k = 1 - xs1[0] if xs1[0] > 0.5 else xs1[0]
+    
+    if len(xs1) == 1:
+        return 10 * (1 - CDF(k, square_difference))
+    else:
+        return (1 - CDF(k, square_difference)) * compare(xs1[1:], xs2[1:])
+
+result = []
+for i in range (len(ALLlist)):
+    iterlist = []
+    for j in range (len(ALLlist)):
+        iterlist.append(compare(ALLlist[i], ALLlist[j]))
+    result.append(iterlist)
+
+def normalise(x):
+    x = np.array(x)
+    magnitude = np.linalg.norm(x)
+    return x / magnitude
+
+result = np.array(list(map(normalise,result)))
+print(result)
+
+SGdlist = [0,3838,8258,15290,5250,6790,10960,8421,4377,18803,9213]
+CNdlist = [3838,0,6883,11647,3047,5767,7780,5368,7474,15050,11240]
+EGdlist = [8258,6883,0,10980,9685,1470,4200,3264,12450,11670,6435]
+USdlist = [15290,11647,10980,0,10150,12090,6830,8786,15180,3514,14400]
+SJdlist = [5250,3047,9685,10150,0,8736,9200,7355,6852,13580,14090]
+ARdlist = [6790,5767,1470,12090,8736,0,5267,3596,10990,13120,6498]
+EUdlist = [10960,7780,4200,6830,9200,5267,0,2544,15210,8429,9881]
+RUdlist = [8421,5368,3264,8786,7355,3596,2544,0,12680,10910,9699]
+AUdlist = [4377,7474,12450,15180,6852,10990,15210,12680,0,15910,10390]
+PAdlist = [18803,15050,11670,3514,13580,13120,8429,10910,15910,0,11780]
+SAdlist = [9213,11240,6435,14400,14090,6498,9881,9699,10390,11780,0]
+
+ALLdlist = [SGdlist, CNdlist, EGdlist, USdlist, SJdlist, ARdlist, EUdlist, RUdlist, AUdlist, PAdlist, SAdlist]
+
+def amend(x):
+    return list(map(lambda t: (20038-t)/20038,x))
+
+ALLdlist = list(map(amend,ALLdlist))
+
+dresult = []
+for i in range (len(ALLdlist)):
+    iterlist = []
+    for j in range (len(ALLdlist)):
+        iterlist.append(compare(ALLdlist[i], ALLdlist[j]))
+    dresult.append(iterlist)
+
+dresult = np.array(list(map(normalise,dresult)))
+
+enumlist = [0,1,2,3,4,5,6,7,8,9,10]
+def prod(x, y):
+    return list(map(lambda t: x[t]*y[t] ,enumlist))
+Finalresult =[]
+for i in range(11):
+    Finalresult.append(prod(result[i], dresult[i]))
+
+def remove_biggest(x):
+    k = max(x)
+    for i in range(len(x)):
+        if (x[i] == k):
+            x[i] = 0
+    return normalise(np.array(x));
+
+Finalresult = np.array(list(map(remove_biggest, Finalresult)))
+print(Finalresult)
