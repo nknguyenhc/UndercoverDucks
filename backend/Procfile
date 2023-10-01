@@ -1,2 +1,2 @@
 # TODO: Modify this Procfile to fit your needs
-web: gunicorn index:app
+web: python migrations.py && python data/traffic.py && python data/userauth.py && gunicorn index:app
