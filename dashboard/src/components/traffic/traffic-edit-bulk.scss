@@ -1,0 +1,48 @@
+.editbulk {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    user-select: none;
+
+    &-button {
+        font-size: 20px;
+        font-weight: 500;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    &-entry {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        &-info {
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+            align-items: center;
+        }
+
+        &-name {
+            font-size: 16px;
+        }
+
+        &-arrow {
+            height: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            img {
+                max-height: 100%;
+            }
+        }
+
+        &-value {
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+            align-items: center;
+        }
+    }
+}

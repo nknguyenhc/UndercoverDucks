@@ -35,8 +35,15 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
     const [proportionTempValue, setProportionTempValue] = useState(0);
     const [diversionIndex, setDiversionIndex] = useState(0);
     const [diversionTempIndex, setDiversionTempIndex] = useState(0);
+    const { isEditingBulk, addProportion, isJustEditedBulk, setIsJustEditedBulk } = useContext(PageContext);
 
     const handleSave = useCallback(() => {
+        if (isEditingBulk) {
+            addProportion(portFrom, portTo, proportionTempValue);
+            setIsEditing(false);
+            return;
+        }
+
         fetch('/traffic/set-proportion', postContent([
             {
                 port_from_id: portFrom.id,
@@ -50,7 +57,6 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
         ]))
             .then(res => {
                 if (res.status !== 200) {
-                    res.text().then(res => console.log(res));
                     alert("Something went wrong");
                     return;
                 }
@@ -67,13 +73,11 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
                             alert("Something went wrong");
                             return;
                         }
-                        res.json().then(res => {
-                            setIsEditing(false);
-                            setDiversionIndex(diversionTempIndex);
-                        });
+                        setIsEditing(false);
+                        setDiversionIndex(diversionTempIndex);
                     });
             })
-    }, [proportionTempValue, diversionTempIndex, portFrom, portTo]);
+    }, [proportionTempValue, diversionTempIndex, portFrom, portTo, isEditingBulk, addProportion]);
 
     const handleCancel = useCallback(() => {
         setIsEditing(false);
@@ -96,8 +100,11 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
     }, [portFrom, portTo]);
 
     useEffect(() => {
-        refreshIndices();
-    }, [refreshIndices]);
+        if (isJustEditedBulk) {
+            setIsJustEditedBulk(false);
+            refreshIndices();
+        }
+    }, [isJustEditedBulk, setIsJustEditedBulk, refreshIndices]);
 
     return <div className="traffic-body-block">
         <div className="traffic-body-block-main">
@@ -119,19 +126,23 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
                             value={proportionTempValue} 
                             onChange={e => setProportionTempValue(e.target.value)}
                         /> 
+                        : isEditingBulk
+                        ? proportionTempValue
                         : proportionIndex}
                     </div>
                 </div>
                 <div className="traffic-body-block-block">
                     <div className="traffic-body-block-block-text">Diversion index:</div>
                     <div className="traffic-body-block-block-stats">
-                        {isEditing 
+                        {isEditing && !isEditingBulk
                         ? <input 
                             type="number"
                             className="traffic-body-block-block-input form-control"
                             value={diversionTempIndex}
                             onChange={e => setDiversionTempIndex(e.target.value)}
                         /> 
+                        : isEditingBulk
+                        ? diversionTempIndex
                         : diversionIndex}
                     </div>
                 </div>

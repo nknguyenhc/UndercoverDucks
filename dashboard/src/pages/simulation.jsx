@@ -82,6 +82,7 @@ export default function Simulate() {
     const [portFrom, setPortFrom] = useState(undefined);
     const [portTo, setPortTo] = useState(undefined);
     const [selectingIndex, setSelectingIndex] = useState(0);
+    const [isJustEditedBulk, setIsJustEditedBulk] = useState(true);
 
     const handlePortSelect = useCallback((port) => {
         if (location.pathname === '/dashboard' || location.pathname === '/ports') {
@@ -123,8 +124,37 @@ export default function Simulate() {
                     setSelectingIndex(0);
                     break;
             }
+            setIsJustEditedBulk(true);
         }
     }, [location, selectingIndex, portFrom, portTo]);
+
+    const [isEditingBulk, setIsEditingBulk] = useState(false);
+    const [proportionList, setProportionList] = useState([]);
+
+    const addProportion = useCallback((portFrom, portTo, proportion) => {
+        setProportionList(proportionList => ([
+            ...proportionList.filter(item => (
+                item.portFrom.name !== portFrom.name
+                || item.portTo.name !== portTo.name
+            )),
+            {
+                portFrom,
+                portTo,
+                proportion,
+            },
+        ]));
+    }, []);
+
+    const removeProportionItem = useCallback((portFrom, portTo) => {
+        setProportionList(proportionList => proportionList.filter(item => (
+            item.portFrom.name !== portFrom.name
+            || item.portTo.name !== portTo.name
+        )))
+    }, []);
+
+    const clearProportions = useCallback(() => {
+        setProportionList([]);
+    }, []);
 
     return <div className="simulation">
         <NavBar />
@@ -141,6 +171,14 @@ export default function Simulate() {
                         refreshPorts,
                         isNewLocation,
                         setIsNewLocation,
+                        isEditingBulk,
+                        setIsEditingBulk,
+                        proportionList,
+                        addProportion,
+                        clearProportions,
+                        removeProportionItem,
+                        isJustEditedBulk,
+                        setIsJustEditedBulk,
                     }}
                 >
                     <PortList 
