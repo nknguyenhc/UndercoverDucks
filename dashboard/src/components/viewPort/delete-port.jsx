@@ -1,5 +1,5 @@
-import { Modal, Button } from "react-bootstrap";
-import { useContext, useState } from "react"; 
+import { Modal, Button, Tooltip, OverlayTrigger } from "react-bootstrap";
+import { useContext, useMemo, useState } from "react"; 
 import { postContent } from '../../utils/request';
 import { PageContext } from "../../pages/simulation";
 
@@ -28,10 +28,18 @@ export default function DeletePort({ refresh }) {
         closeModal(); 
     }
 
+    const shutdownTooltip = useMemo(() => (
+        <Tooltip>
+            Simulate if this port shuts down at this time.
+        </Tooltip>
+    ), []);
+
     return <>
-        <div className="deleteport-modalButton" onClick={openModal}>
-            Shut down
-        </div>
+        <OverlayTrigger placement="left" overlay={shutdownTooltip}>
+            <div className="deleteport-modalButton" onClick={openModal}>
+                Shut down
+            </div>
+        </OverlayTrigger>
         <Modal show={isOpen} onHide={closeModal}>
             <Modal.Header closeButton>
                 <Modal.Title>Confirm Shut down?</Modal.Title>
