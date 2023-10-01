@@ -58,9 +58,10 @@ export default function AddPort() {
                         <input 
                             name="portCountry"
                             type="text" 
+                            value={portCountry}
                             placeholder="Port Country"
                             className="addport-box form-control"
-                            onChange={(e) => setPortCountry(e.target.value)}>
+                            onChange={(e) => setPortCountry(e.target.value.slice(0, 3).toUpperCase())}>
                         </input>
                     </div>
                     <div className="addport-field">
@@ -68,9 +69,14 @@ export default function AddPort() {
                         <input 
                             name="portVolume"
                             type="number" 
+                            value={portVolume}
                             placeholder="Port Volume"
                             className="addport-box form-control"
-                            onChange={(e) => setPortVolume(e.target.value)}>
+                            onChange={(e) => {
+                                if (Number.isInteger(Number(e.target.value)) && Number(e.target.value) >= 0) {
+                                    setPortVolume(e.target.value);
+                                }
+                            }}>
                         </input>
                     </div>
                 </div>
