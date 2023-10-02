@@ -97,6 +97,8 @@ const TrafficInfoBlock = ({ portFrom, portTo }) => {
                 res.json().then(res => {
                     setProportionIndex(res.traffic.proportion);
                     setProportionTempValue(res.traffic.proportion);
+                    setDiversionTempIndex(res.traffic.similarity);
+                    setDiversionIndex(res.traffic.similarity);
                 })
             })
     }, [portFrom, portTo]);
