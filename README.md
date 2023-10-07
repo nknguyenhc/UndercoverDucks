@@ -1,6 +1,14 @@
 # UndercoverDucks
 Repository for PSA codesprint 2023 submission.
 
+[https://undercover-ducks.fly.dev/](https://undercover-ducks.fly.dev/)
+
+Public account:
+
+Username: `test`
+
+Password: `test`
+
 ## About
 
 PSA has implemented mechanisms to predict the changes in incoming and outgoing ships in Singapore ports. 
